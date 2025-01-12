@@ -14,7 +14,6 @@
         }
         
         .page {
-            display: none;
             position: absolute;
             top: 0;
             left: 0;
@@ -26,11 +25,11 @@
             text-align: center;
             padding: 20px;
             box-sizing: border-box;
-            transition: opacity 0.5s;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* 淡出淡入效果 */
         }
 
         .page.active {
-            display: block;
             opacity: 1;
         }
 
@@ -76,7 +75,7 @@
                 currentPage = (currentPage - 1 + totalPages) % totalPages;
             }
 
-            // Hide all pages and show the current page
+            // Hide all pages and show the current page with fade effect
             pages.forEach(page => page.classList.remove('active'));
             pages[currentPage].classList.add('active');
         });
