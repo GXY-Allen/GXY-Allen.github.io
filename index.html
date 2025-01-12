@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Page at a Time</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .page {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 2em;
+            color: white;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .page:nth-child(1) { background: url('background1.jpg') center/cover no-repeat; }
+        .page:nth-child(2) { background: url('background2.jpg') center/cover no-repeat; }
+        .page:nth-child(3) { background: url('background3.jpg') center/cover no-repeat; }
+
+        .visible {
+            opacity: 1;
+        }
+
+        .hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="page visible">Welcome to the first page!</div>
+    <div class="page hidden">This is the second page. Scroll down!</div>
+    <div class="page hidden">This is the third page. Thanks for visiting!</div>
+
+    <script>
+        const pages = document.querySelectorAll('.page');
+        let currentPageIndex = 0;
+
+        function showPage(index) {
+            pages.forEach((page, i) => {
+                page.className = i === index ? 'page visible' : 'page hidden';
+            });
+        }
+
+        let scrollTimeout;
+        window.addEventListener('wheel', (e) => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (e.deltaY > 0 && currentPageIndex < pages.length - 1) {
+                    currentPageIndex++;
+                    showPage(currentPageIndex);
+                } else if (e.deltaY < 0 && currentPageIndex > 0) {
+                    currentPageIndex--;
+                    showPage(currentPageIndex);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
