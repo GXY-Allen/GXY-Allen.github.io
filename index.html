@@ -67,12 +67,12 @@
         // Add scroll event listener to change pages
         window.addEventListener('wheel', (event) => {
             // Scroll down
-            if (event.deltaY > 0) {
-                currentPage = (currentPage + 1) % totalPages;
+            if (event.deltaY > 0 && currentPage < totalPages - 1) {
+                currentPage++;
             } 
             // Scroll up
-            else {
-                currentPage = (currentPage - 1 + totalPages) % totalPages;
+            else if (event.deltaY < 0 && currentPage > 0) {
+                currentPage--;
             }
 
             // Hide all pages and show the current page with fade effect
