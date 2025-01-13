@@ -207,34 +207,54 @@
         let currentPage = 0;
         const pages = document.querySelectorAll('.page');
         const totalPages = pages.length;
-        let isScrolling = false; // 用于控制滚动间隔
+        let isScrolling = false;
+        let touchStartY = 0;
+        let touchEndY = 0;
 
-        // Show the first page
         pages[currentPage].classList.add('active');
 
-        // Add scroll event listener to change pages
-        window.addEventListener('wheel', (event) => {
-            if (isScrolling) return; // 如果在滚动间隔内，忽略事件
+        // 切换页面
+        function changePage(direction) {
+            if (isScrolling) return;
 
             isScrolling = true;
+            setTimeout(() => isScrolling = false, 1000); // 防止过快滚动
 
-            // 设置滚动延迟，避免过快翻页
-            setTimeout(() => {
-                isScrolling = false;
-            }, 1000); // 设置延迟为1000ms (1秒)
-
-            // Scroll down
-            if (event.deltaY > 0 && currentPage < totalPages - 1) {
+            // 计算下一页
+            if (direction === 'down' && currentPage < totalPages - 1) {
                 currentPage++;
-            } 
-            // Scroll up
-            else if (event.deltaY < 0 && currentPage > 0) {
+            } else if (direction === 'up' && currentPage > 0) {
                 currentPage--;
             }
 
-            // Hide all pages and show the current page with fade effect
+            // 更新页面显示
             pages.forEach(page => page.classList.remove('active'));
             pages[currentPage].classList.add('active');
+        }
+
+        // 鼠标滚轮事件
+        window.addEventListener('wheel', (event) => {
+            if (event.deltaY > 0) {
+                changePage('down');
+            } else if (event.deltaY < 0) {
+                changePage('up');
+            }
+        });
+
+        // 触屏滑动事件
+        window.addEventListener('touchstart', (event) => {
+            touchStartY = event.touches[0].clientY;
+        });
+
+        window.addEventListener('touchend', (event) => {
+            touchEndY = event.changedTouches[0].clientY;
+            const deltaY = touchStartY - touchEndY;
+
+            if (deltaY > 50) {
+                changePage('down');
+            } else if (deltaY < -50) {
+                changePage('up');
+            }
         });
     </script>
 
