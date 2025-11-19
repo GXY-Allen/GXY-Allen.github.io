@@ -1,0 +1,48 @@
+name: Build Blog Page
+
+# 触发条件：当 main 分支有 push 操作时
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'posts/**'      # 只有 posts 文件夹变动时才运行
+      - 'template.html' # 或者模板变动时运行
+      - 'build.py'
+
+# 任务权限配置
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 1. 把代码拉取到服务器
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. 安装 Python 环境
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. 安装依赖 (Markdown 库)
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    # 4. 运行你的脚本
+    - name: Run build script
+      run: python build.py
+
+    # 5. 把生成的 index.html 提交回仓库
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add index.html
+        # 如果 index.html 有变化才提交，否则不报错
+        git commit -m "Auto-build: Update index.html" || echo "No changes to commit"
+        git push
