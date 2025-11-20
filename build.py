@@ -50,12 +50,15 @@ def build():
 
             # --- 【核心逻辑：处理首页的相对路径】 ---
             
-            # 首页跳进文章页，是 "进到 pages 文件夹找 xxx.html"
+            # 改动点：用 <a class="card-link"> 把整个 div 包起来
+            # 注意：我把 href 放在了最外面的 a 标签上
             index_list_html += f"""
-            <div class="post-card">
-                <h2><a href="{OUTPUT_DIR}/{name}.html">{name}</a></h2>
-                <p>点击阅读全文...</p>
-            </div>
+            <a href="{OUTPUT_DIR}/{name}.html" class="card-link">
+                <div class="post-card">
+                    <h2>{name}</h2>
+                    <p>点击阅读全文...</p>
+                </div>
+            </a>
             """
 
     # 4. 生成首页

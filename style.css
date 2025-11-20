@@ -2,33 +2,55 @@ body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background-color: 
 .hero { height: 300px; background: #444; color: white; display: flex; align-items: center; justify-content: center; }
 .hero h1 { font-size: 40px; }
 .container { width: 800px; margin: -40px auto 0; }
+
+/* 详情页可能用到的样式 */
 .card { background: white; padding: 30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .date { color: #999; font-size: 0.9em; margin-bottom: 10px; display: block;}
 h2 { margin-top: 0; }
 img { max-width: 100%; }
-/* 文章卡片（方块）样式 */
-.post-card {
-    background-color: white; /* 白色背景 */
-    border: 1px solid #ddd;  /* 灰色边框 */
-    padding: 20px;           /* 内边距 */
-    margin-bottom: 20px;     /* 卡片之间的间距 */
-    border-radius: 8px;      /* 圆角 */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 只有一点点阴影，更有质感 */
-    transition: transform 0.2s; /* 鼠标放上去时的动画效果 */
-}
 
-/* 鼠标悬停在方块上时，稍微浮起 */
-.post-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
+/* =========================================
+   以下是修改后的部分
+   ========================================= */
 
-/* 去掉链接下划线，让标题更好看 */
-.post-card h2 a {
+/* 1. 链接包裹层样式 */
+a.card-link {
     text-decoration: none;
-    color: #333;
+    color: inherit;
+    display: block;
 }
 
-.post-card h2 a:hover {
-    color: #007bff; /* 鼠标悬停变蓝 */
+/* 2. 文章卡片（方块）样式 */
+.post-card {
+    background-color: white;
+    border: 1px solid #ddd;  /* 原始边框：浅灰 */
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
+    /* 加上 border-color 的过渡动画，让变色更柔和 */
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; 
+    cursor: pointer;
+}
+
+/* 3. 鼠标悬停交互 */
+a.card-link:hover .post-card {
+    transform: translateY(-5px);            
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    
+    /* 【修改点】: 边框颜色加深 (从浅灰 #ddd 变成 深灰 #999)，而不是变蓝 */
+    border-color: #999;   
+}
+
+/* 4. 标题样式 */
+.post-card h2 {
+    margin-top: 0;
+    color: #333;
+    transition: color 0.2s;
+}
+
+/* 【保持不变】: 鼠标悬停时，标题依然变蓝 */
+a.card-link:hover .post-card h2 {
+    color: #007bff;
 }
