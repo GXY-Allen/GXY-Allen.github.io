@@ -6,11 +6,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="hero">
-        <h1>Winter Wonderland</h1>
-    </header>
-    <div class="container">
-        <h1>文章列表</h1>
+    <div class="app-layout">
+        
+        <aside class="sidebar left">
+            </aside>
+
+        <main class="middle-column">
+            
+            <header class="hero">
+                <h1>Winter Wonderland</h1>
+            </header>
+            
+            <div class="content-container">
+                <h1>文章列表</h1>
             <a href="pages/Git指南.html" class="card-link">
                 <div class="post-card">
                     <h2>Git指南</h2>
@@ -25,6 +33,24 @@
                 </div>
             </a>
             
+            </div>
+        </main>
+
+        <aside class="sidebar right">
+            
+            <div class="sidebar-block">
+                <h3>日历</h3>
+                <p>2025年11月</p>
+            </div>
+
+            <div class="sidebar-block">
+                <h3>公告</h3>
+                <p>欢迎来到我的博客！</p>
+                <p>这里记录我的 Python 和 Git 学习之路。</p>
+            </div>
+
+        </aside>
+
     </div>
 </body>
 </html>

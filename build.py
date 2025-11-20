@@ -50,9 +50,10 @@ def build():
             back_link = '<p><a href="../index.html">← 返回首页</a></p>'
             
             # 3. 组合内容
+            # 给文章内容多包一层 <div class="card">
             final_article_html = article_page.replace(
                 '{{ content }}', 
-                f"{back_link}\n{html_content}"
+                f"{back_link}\n<div class='card'>{html_content}</div>"
             )
 
             # 写入 pages 文件夹

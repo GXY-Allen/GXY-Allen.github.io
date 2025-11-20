@@ -1,97 +1,162 @@
-body { margin: 0; font-family: "Microsoft YaHei", sans-serif; background-color: #f5f5f5; }
-.hero { height: 300px; background: #444; color: white; display: flex; align-items: center; justify-content: center; }
-.hero h1 { font-size: 40px; }
-.container { width: 800px; margin: -40px auto 0; }
-
-/* 详情页可能用到的样式 */
-.card { background: white; padding: 30px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.date { color: #999; font-size: 0.9em; margin-bottom: 10px; display: block;}
-h2 { margin-top: 0; }
-img { max-width: 100%; }
-
 /* =========================================
-   以下是修改后的部分
+   1. 全局设置
    ========================================= */
-
-/* 1. 链接包裹层样式 */
-a.card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
+body { 
+    margin: 0; 
+    font-family: "Microsoft YaHei", sans-serif; 
+    background-color: #f5f5f5; 
+    height: 100vh;             /* 强制一屏高度 */
+    overflow: hidden;          /* 禁止 body 滚动 */
 }
 
-/* 2. 文章卡片（方块）样式 */
-.post-card {
-    background-color: white;
-    border: 1px solid #ddd;  /* 原始边框：浅灰 */
+/* =========================================
+   2. App 布局大容器
+   ========================================= */
+.app-layout {
+    display: flex;             
+    height: 100%;              
+    width: 100%;
+    max-width: 1600px;         
+    margin: 0 auto;            
+}
+
+/* =========================================
+   3. 左右侧边栏 (通用)
+   ========================================= */
+.sidebar {
+    height: 100%;              
+    background: white;         
+    overflow-y: auto;          
+    flex-shrink: 0;            
+    padding: 20px;             
+    box-sizing: border-box;    
+}
+
+/* --- 左边栏 (修改点) --- */
+.sidebar.left {
+    width: 200px;              /* 【修改】精确调整为 200px */
+    border-right: 1px solid #eee; 
+}
+
+/* --- 右边栏 (保持不变) --- */
+.sidebar.right {
+    width: 280px;              
+    border-left: 1px solid #eee;  
+}
+
+/* =========================================
+   4. 侧边栏 Block
+   ========================================= */
+.sidebar-block {
+    background: #fff;          
+    border: 1px solid #e1e4e8; 
+    border-radius: 8px;        
     padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    
-    /* 加上 border-color 的过渡动画，让变色更柔和 */
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; 
-    cursor: pointer;
+    margin-bottom: 20px;       
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
 }
-
-/* 3. 鼠标悬停交互 */
-a.card-link:hover .post-card {
-    transform: translateY(-5px);            
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
-    
-    /* 【修改点】: 边框颜色加深 (从浅灰 #ddd 变成 深灰 #999)，而不是变蓝 */
-    border-color: #999;   
-}
-
-/* 4. 标题样式 */
-.post-card h2 {
+.sidebar-block h3 {
     margin-top: 0;
+    font-size: 1.1em;
     color: #333;
-    transition: color 0.2s;
-}
-
-/* 【保持不变】: 鼠标悬停时，标题依然变蓝 */
-a.card-link:hover .post-card h2 {
-    color: #007bff;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 /* =========================================
-   新增：Markdown 代码块与文字样式
+   5. 中间列 (滚动区)
    ========================================= */
+.middle-column {
+    flex: 1;                   
+    height: 100%;              
+    overflow-y: auto;          
+    background-color: #f5f5f5; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;       
+}
 
-/* 1. 代码块 (即 ``` 包裹的大段代码) */
+/* =========================================
+   6. Hero 区域
+   ========================================= */
+.hero { 
+    width: 100%;               
+    height: 250px;             
+    background: #444; 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 20px;       /* 这里的间距也稍微调小了一点 */
+    flex-shrink: 0;            
+}
+.hero h1 { font-size: 36px; }
+
+/* =========================================
+   7. 文章内容容器 (修改点)
+   ========================================= */
+.content-container {
+    /* 【修改】宽度占比变大，左右间隙变小 */
+    width: 96%;                
+    
+    /* 【修改】最大宽度放宽，让它能撑得更开 */
+    max-width: 1000px;          
+    
+    padding-bottom: 50px;      
+}
+
+/* =========================================
+   8. 卡片样式
+   ========================================= */
+.card, .post-card { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    margin-bottom: 15px;       /* 卡片之间的垂直间距也稍微调小了 (原来是20) */
+}
+
+/* 首页交互 */
+.post-card {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+a.card-link { text-decoration: none; color: inherit; display: block; }
+
+a.card-link:hover .post-card {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: #999;
+}
+.post-card h2 { margin-top: 0; color: #333; transition: color 0.2s; }
+a.card-link:hover .post-card h2 { color: #007bff; }
+
+/* =========================================
+   9. Markdown 样式
+   ========================================= */
+img { max-width: 100%; }
 pre {
-    background-color: #f6f8fa; /* 浅灰背景 */
-    border: 1px solid #e1e4e8; /* 灰色细边框 */
-    border-radius: 6px;        /* 圆角 */
-    padding: 16px;             /* 内边距 */
-    overflow: auto;            /* 如果代码太长，出现横向滚动条，不撑破页面 */
-    line-height: 1.45;         /* 行间距 */
-    margin-bottom: 16px;       /* 下方留白 */
+    background-color: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 16px;
+    overflow: auto;
+    line-height: 1.45;
+    margin-bottom: 16px;
 }
-
-/* 2. 专门针对代码块里的文字 */
 pre code {
-    background-color: transparent; /* 去掉背景，使用 pre 的背景 */
+    background-color: transparent;
     padding: 0;
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; /* 编程字体 */
-    font-size: 0.9em;          /* 字号稍微小一点 */
-    color: #24292e;            /* 代码颜色：深灰 */
+    font-family: Consolas, monospace;
+    font-size: 0.9em;
+    color: #24292e;
 }
-
-/* 3. 行内代码 (即文中用 ` 包裹的短代码) */
-/* 注意：这个样式是给不在 pre 里的 code 用的 */
 code {
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-    background-color: rgba(27,31,35,0.05); /* 淡淡的灰色背景 */
-    padding: 0.2em 0.4em;      /* 稍微撑开一点背景 */
+    font-family: Consolas, monospace;
+    background-color: rgba(27,31,35,0.05);
+    padding: 0.2em 0.4em;
     border-radius: 3px;
     font-size: 0.85em;
-}
-
-/* 4. 普通段落样式 (优化阅读体验) */
-p {
-    line-height: 1.6;          /* 增加行高，阅读不累 */
-    color: #333;
-    margin-bottom: 16px;
 }
