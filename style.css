@@ -54,3 +54,44 @@ a.card-link:hover .post-card {
 a.card-link:hover .post-card h2 {
     color: #007bff;
 }
+
+/* =========================================
+   新增：Markdown 代码块与文字样式
+   ========================================= */
+
+/* 1. 代码块 (即 ``` 包裹的大段代码) */
+pre {
+    background-color: #f6f8fa; /* 浅灰背景 */
+    border: 1px solid #e1e4e8; /* 灰色细边框 */
+    border-radius: 6px;        /* 圆角 */
+    padding: 16px;             /* 内边距 */
+    overflow: auto;            /* 如果代码太长，出现横向滚动条，不撑破页面 */
+    line-height: 1.45;         /* 行间距 */
+    margin-bottom: 16px;       /* 下方留白 */
+}
+
+/* 2. 专门针对代码块里的文字 */
+pre code {
+    background-color: transparent; /* 去掉背景，使用 pre 的背景 */
+    padding: 0;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; /* 编程字体 */
+    font-size: 0.9em;          /* 字号稍微小一点 */
+    color: #24292e;            /* 代码颜色：深灰 */
+}
+
+/* 3. 行内代码 (即文中用 ` 包裹的短代码) */
+/* 注意：这个样式是给不在 pre 里的 code 用的 */
+code {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    background-color: rgba(27,31,35,0.05); /* 淡淡的灰色背景 */
+    padding: 0.2em 0.4em;      /* 稍微撑开一点背景 */
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+/* 4. 普通段落样式 (优化阅读体验) */
+p {
+    line-height: 1.6;          /* 增加行高，阅读不累 */
+    color: #333;
+    margin-bottom: 16px;
+}

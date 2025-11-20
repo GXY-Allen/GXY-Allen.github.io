@@ -106,12 +106,12 @@ ref: [Git](https://git-scm.com/book/zh/v2)
 1. 用户信息：
 
    ```
-   $ git config --global user.name "xxx"
-   $ git config --global user.email xxx@example.com
+	$ git config --global user.name "xxx"
+	$ git config --global user.email xxx@example.com
    ```
 
    如果使用了 `--global` 选项，那么该命令只需要运行一次，因为之后无论你在该系统上做任何事情， Git 都会使用那些信息。 当你想针对特定项目使用不同的用户名称与邮件地址时，可以在那个项目目录下运行没有 `--global` 选项的命令来配置。
-   
+
 2. 检查配置信息
 
    如果想要检查你的配置，可以使用 `git config --list` 命令来列出所有 Git 当时能找到的配置
