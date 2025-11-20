@@ -30,6 +30,10 @@ body {
     flex-shrink: 0;            
     padding: 20px;             
     box-sizing: border-box;    
+    
+    /* 【新增】开启 Flex 垂直布局 */
+    display: flex;
+    flex-direction: column;
 }
 
 /* --- 左边栏 (修改点) --- */
@@ -42,6 +46,38 @@ body {
 .sidebar.right {
     width: 280px;              
     border-left: 1px solid #eee;  
+}
+
+/* 2. 【新增】底部按钮容器样式 */
+/* margin-top: auto 会自动把这个元素推到容器的最下面 */
+.bottom-nav {
+    margin-top: auto; 
+}
+
+/* 3. 【新增】漂亮的按钮样式 */
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #f6f8fa; /* 浅灰背景 */
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid #e1e4e8;
+    transition: all 0.2s;
+    font-weight: bold;
+    box-sizing: border-box; /* 防止 padding 撑破宽度 */
+}
+
+/* 鼠标悬停效果 */
+.nav-btn:hover {
+    background-color: #007bff; /* 变蓝 */
+    color: white;              /* 文字变白 */
+    border-color: #007bff;
+    transform: translateY(-2px); /* 微微上浮 */
+    box-shadow: 0 4px 8px rgba(0,123,255,0.2);
 }
 
 /* =========================================
