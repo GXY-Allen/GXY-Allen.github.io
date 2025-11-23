@@ -196,3 +196,54 @@ code {
     border-radius: 3px;
     font-size: 0.85em;
 }
+
+/* =========================================
+   日历组件样式 (仿 GitHub 风格)
+   ========================================= */
+
+/* 日历外层容器 */
+.calendar-wrapper {
+    font-size: 14px;
+    color: #333;
+}
+
+/* 表格本体 */
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse; /* 去掉表格间隙 */
+    text-align: center;
+}
+
+/* 月份标题 (Python 自动生成的表头) */
+.calendar-table th.month {
+    padding-bottom: 10px;
+    font-weight: bold;
+    color: #0969da; /* 蓝色月份 */
+}
+
+/* 星期几的标题 (Sun, Mon...) */
+.calendar-table th {
+    font-size: 0.85em;
+    color: #666;
+    padding: 5px 0;
+}
+
+/* 日期单元格 */
+.calendar-table td {
+    padding: 8px 0;
+    border-radius: 4px; /* 圆角格子 */
+    transition: background-color 0.2s;
+}
+
+/* 今天的日期 (高亮) */
+.calendar-table td.today {
+    background-color: #2dba4e; /* GitHub 绿！ */
+    color: white;
+    font-weight: bold;
+}
+
+/* 普通日期的悬停效果 */
+.calendar-table td:not(.today):not(.noday):hover {
+    background-color: #ebedf0; /* 浅灰悬停 */
+    cursor: pointer;
+}
