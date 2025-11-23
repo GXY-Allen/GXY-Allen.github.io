@@ -9,30 +9,61 @@ OUTPUT_DIR = 'pages'
 TEMPLATE_FILE = 'template.html'
 # ----------------
 
-# 【新增】生成日历 HTML 的函数
+# 【重写】生成日历 HTML 的函数 (高级版)
 def generate_calendar_html():
     now = datetime.datetime.now()
     year = now.year
     month = now.month
-    today = now.day
+    today_date = datetime.date.today()
     
-    # 创建日历对象 (0 = 星期一作为一周开始, 6 = 星期日)
-    cal = calendar.HTMLCalendar(firstweekday=6) 
+    # 1. 设置星期日(6)为一周的第一天
+    cal = calendar.Calendar(firstweekday=6)
     
-    # 获取当月日历的 HTML (这是一个 table)
-    # 我们需要稍微处理一下这个字符串，给"今天"加上特殊的 class
-    cal_html = cal.formatmonth(year, month)
+    # 2. 获取当月的“日期矩阵”
+    # 这会返回一个列表，里面包含了完整的几周
+    # 每一周都是一个包含7个 datetime.date 对象的列表
+    # (会自动包含上个月结尾和下个月开头的天数)
+    weeks = cal.monthdatescalendar(year, month)
     
-    # 这是一个简单粗暴的替换法，把今天的日期 highlight 出来
-    # 注意：为了防止替换错（比如把 12 里的 1 替换了），我们匹配 ">1<" 这种带尖括号的
-    target_day = f">{today}<"
-    highlighted_day = f" class='today'>{today}<"
-    cal_html = cal_html.replace(target_day, highlighted_day)
+    # 3. 开始构建 HTML
+    # 表头：月份 (November 2025)
+    month_name = calendar.month_name[month]
+    html_lines = []
+    html_lines.append(f'<div class="calendar-header">{month_name} {year}</div>')
     
-    # 稍微清理一下默认的 CSS类名，方便我们写样式
-    cal_html = cal_html.replace('border="0" cellpadding="0" cellspacing="0" class="month"', 'class="calendar-table"')
+    html_lines.append('<table class="calendar-table">')
     
-    return cal_html
+    # 表头：星期几 (Sun Mon ...)
+    html_lines.append('<thead><tr>')
+    week_headers = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    for day in week_headers:
+        html_lines.append(f'<th>{day}</th>')
+    html_lines.append('</tr></thead>')
+    
+    # 表体：日期
+    html_lines.append('<tbody>')
+    for week in weeks:
+        html_lines.append('<tr>')
+        for day in week:
+            # 判断每一天的情况
+            classes = []
+            
+            # 情况A: 如果不是本月，标记为 other-month
+            if day.month != month:
+                classes.append("other-month")
+            
+            # 情况B: 如果是今天，标记为 today
+            if day == today_date:
+                classes.append("today")
+            
+            # 生成 td
+            class_str = f' class="{" ".join(classes)}"' if classes else ""
+            html_lines.append(f'<td{class_str}>{day.day}</td>')
+            
+        html_lines.append('</tr>')
+    html_lines.append('</tbody></table>')
+    
+    return "\n".join(html_lines)
 
 def build():
     # 1. 创建 pages 文件夹

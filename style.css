@@ -198,52 +198,76 @@ code {
 }
 
 /* =========================================
-   日历组件样式 (仿 GitHub 风格)
+   日历组件样式 (完整方格版)
    ========================================= */
 
-/* 日历外层容器 */
 .calendar-wrapper {
     font-size: 14px;
     color: #333;
+    padding: 0 5px; /* 稍微给点内边距 */
 }
 
-/* 表格本体 */
+/* 1. 月份标题 (November 2025) */
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    color: #0969da;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+/* 2. 表格布局 */
 .calendar-table {
     width: 100%;
-    border-collapse: collapse; /* 去掉表格间隙 */
+    /* 【关键】固定布局，确保每个格子宽度完全一样 */
+    table-layout: fixed; 
+    border-collapse: collapse;
     text-align: center;
 }
 
-/* 月份标题 (Python 自动生成的表头) */
-.calendar-table th.month {
-    padding-bottom: 10px;
-    font-weight: bold;
-    color: #0969da; /* 蓝色月份 */
-}
-
-/* 星期几的标题 (Sun, Mon...) */
+/* 星期几标题 */
 .calendar-table th {
     font-size: 0.85em;
     color: #666;
-    padding: 5px 0;
+    padding-bottom: 8px;
+    font-weight: normal;
 }
 
-/* 日期单元格 */
+/* 3. 日期格子 (统一样式) */
 .calendar-table td {
-    padding: 8px 0;
-    border-radius: 4px; /* 圆角格子 */
-    transition: background-color 0.2s;
+    height: 32px;       /* 【关键】固定高度 */
+    width: 32px;        /* 虽然 table-layout 会自动分宽，但设个参考值更好 */
+    line-height: 32px;  /* 让文字垂直居中 */
+    border-radius: 6px; /* 圆角 */
+    font-size: 0.95em;
+    cursor: default;
+    /* 加上边框让它看起来更像格子（可选，如果不想太乱可以去掉） */
+    /* border: 1px solid transparent; */
 }
 
-/* 今天的日期 (高亮) */
+/* 4. 不是本月的日期 (上个月/下个月) */
+.calendar-table td.other-month {
+    color: #aaa;   /* 字体变灰 */
+    opacity: 0.5;  /* 【关键】增加透明度 */
+}
+
+/* 5. 今天的日期 (高亮) */
 .calendar-table td.today {
-    background-color: #2dba4e; /* GitHub 绿！ */
+    background-color: #2dba4e; /* GitHub 绿 */
     color: white;
+    font-weight: bold;
+    box-shadow: 0 0 0 2px #c3e8cd; /* 给一个小光晕，更显眼 */
+}
+
+/* 6. 普通日期的悬停效果 (浅灰背景) - 保持不变 */
+.calendar-table td:not(.today):hover {
+    background-color: #ebedf0;
+    cursor: pointer;
     font-weight: bold;
 }
 
-/* 普通日期的悬停效果 */
-.calendar-table td:not(.today):not(.noday):hover {
-    background-color: #ebedf0; /* 浅灰悬停 */
+/* 7. 【新增】今天的悬停效果 (让绿色变深) */
+.calendar-table td.today:hover {
+    background-color: #239a3b; /* 比原来的 #2dba4e 更深一点的绿 */
     cursor: pointer;
 }
