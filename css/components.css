@@ -46,12 +46,17 @@
    3. 侧边栏 Block
    ========================================= */
 .sidebar-block {
-    background: #fff;          
-    border: 1px solid #e1e4e8; 
+    /* 【修改】背景改为高不透明度白色 (0.85) */
+    background: rgba(255, 255, 255, 0.85);
+    
+    /* 可选：如果你想让小方块也有点磨砂感，可以加 backdrop-filter */
+    /* backdrop-filter: blur(5px); */
+    
+    border: 1px solid rgba(255,255,255,0.4); /* 边框也改成半透明，更融合 */
     border-radius: 8px;        
     padding: 20px;
     margin-bottom: 20px;       
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
 }
 .sidebar-block h3 {
     margin-top: 0;
@@ -66,12 +71,16 @@
 /* =========================================
    4. 通用白卡片
    ========================================= */
+/* 通用卡片 (文章内容 & 首页列表) */
 .card, .post-card { 
-    background: white; 
+    /* 【修改】文章背景也改为高不透明度 (0.9) 让阅读更清晰 */
+    background: rgba(255, 255, 255, 0.9);
+    
     padding: 30px; 
     border-radius: 8px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
     margin-bottom: 15px;
+    border: none; /* 去掉之前的灰色实线边框 */
 }
 
 
