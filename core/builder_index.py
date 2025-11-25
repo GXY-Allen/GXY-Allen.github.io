@@ -26,7 +26,11 @@ def build_index_page(posts_metadata, raw_template, common_context):
     page_html = page_html.replace('{{ calendar_widget }}', common_context['calendar'])
 
     # 填入文章列表
-    page_html = page_html.replace('{{ content }}', "<h1>文章列表</h1>" + index_list_html)
+    # 【修改】加上 id='article-content'，让首页列表也能触发滚动渐入特效
+    page_html = page_html.replace(
+        '{{ content }}', 
+        f"<div id='article-content'><h1>文章列表</h1>{index_list_html}</div>"
+    )
     
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(page_html)
