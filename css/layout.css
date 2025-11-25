@@ -15,15 +15,15 @@
    ========================================= */
 .sidebar {
     height: 100%;              
-    
-    /* 【修改点 1】背景不透明度提高到 0.7，更实了 */
     background: rgba(255, 255, 255, 0.7);
-    
-    /* 毛玻璃特效 (保持不变) */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     
     overflow-y: auto;          
+    
+    /* 【核心修改】强制禁止左右滑动 */
+    overflow-x: hidden; 
+    
     flex-shrink: 0;            
     padding: 20px;             
     box-sizing: border-box;    
