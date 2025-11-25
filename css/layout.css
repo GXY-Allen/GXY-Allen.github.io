@@ -16,12 +16,12 @@
 .sidebar {
     height: 100%;              
     
-    /* 【修改】背景改为半透明白色 (0.3 表示 30% 不透明度) */
-    background: rgba(255, 255, 255, 0.3);
+    /* 【修改点 1】背景不透明度提高到 0.7，更实了 */
+    background: rgba(255, 255, 255, 0.7);
     
-    /* 【新增】毛玻璃特效 (模糊背后的图片) */
+    /* 毛玻璃特效 (保持不变) */
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); /* 兼容 Safari */
+    -webkit-backdrop-filter: blur(10px);
     
     overflow-y: auto;          
     flex-shrink: 0;            
@@ -29,20 +29,19 @@
     box-sizing: border-box;    
     display: flex;
     flex-direction: column;
-    
-    /* 【建议】去掉原来的实线边框，因为毛玻璃一般不需要边框 */
     border: none; 
 }
-/* 左边栏尺寸 */
+
+/* 左边栏 */
 .sidebar.left {
     width: 200px;
-    border-right: none; /* 去掉边框 */
+    border-right: none; 
 }
 
-/* 右边栏尺寸 */
+/* 右边栏 */
 .sidebar.right {
     width: 280px;
-    border-left: none; /* 去掉边框 */
+    border-left: none; 
 }
 
 /* =========================================
@@ -61,9 +60,14 @@
     height: 100%;              
     overflow-y: auto;          
     
-    /* 【修改】背景改为完全透明，这样能看到底下的 body 背景图 */
-    background-color: transparent; 
+    /* 【修改点】将黑色半透明(0,0,0) 改为 白色半透明(255,255,255) */
+    /* 0.5 表示 50% 不透明度，你可以根据喜好在 0.3 ~ 0.8 之间调整 */
+    background-color: rgba(255, 255, 255, 0.5); 
     
+    /* 【建议新增】加上毛玻璃模糊效果，让背景图不干扰文字 */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
     display: flex;
     flex-direction: column;
     align-items: center;       
