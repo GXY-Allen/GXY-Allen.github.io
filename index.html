@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Allen's Blog</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/markdown.css">
+    <link rel="stylesheet" href="css/animations.css">
 </head>
 <body>
     <div class="app-layout">
@@ -18,20 +23,20 @@
             </header>
             <div class="content-container">
                 <h1>文章列表</h1>
-            <a href="pages/Git指南.html" class="card-link">
-                <div class="post-card">
-                    <h2>Git指南</h2>
-                    <p>点击阅读全文...</p>
-                </div>
-            </a>
-            
-            <a href="pages/test.html" class="card-link">
-                <div class="post-card">
-                    <h2>test</h2>
-                    <p>点击阅读全文...</p>
-                </div>
-            </a>
-            
+        <a href="pages/Git指南.html" class="card-link">
+            <div class="post-card">
+                <h2>Git指南</h2>
+                <p>点击阅读全文...</p>
+            </div>
+        </a>
+        
+        <a href="pages/test.html" class="card-link">
+            <div class="post-card">
+                <h2>test</h2>
+                <p>点击阅读全文...</p>
+            </div>
+        </a>
+        
             </div>
         </main>
 
@@ -89,9 +94,9 @@
 <td>22</td>
 </tr>
 <tr>
-<td class="today">23</td>
+<td>23</td>
 <td>24</td>
-<td>25</td>
+<td class="today">25</td>
 <td>26</td>
 <td>27</td>
 <td>28</td>
@@ -119,4 +124,43 @@
 
     </div>
 </body>
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. 找到文章容器里的所有主要元素 (标题、段落、图片、列表)
+            // 注意：我们只选 id="article-content" 里面的东西，不影响侧边栏
+            const articleContainer = document.getElementById('article-content');
+            
+            if (articleContainer) {
+                // 选取文章内的所有子元素
+                const elements = articleContainer.querySelectorAll('h1, h2, h3, p, img, li, pre');
+                
+                // 给它们都加上初始的隐身类名
+                elements.forEach(el => {
+                    el.classList.add('reveal-item');
+                });
+
+                // 2. 创建一个观察员 (Observer)
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        // 如果元素进入了屏幕 (isIntersecting 为真)
+                        if (entry.isIntersecting) {
+                            // 给它加上 visible 类名，触发 CSS 动画
+                            entry.target.classList.add('visible');
+                            
+                            // 动画放完就不管了，取消观察 (这样往回滚的时候不会重复闪烁)
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.1, // 只要露出 10% 就开始动画
+                    rootMargin: "0px 0px -50px 0px" // 稍微提前一点点触发
+                });
+
+                // 3. 开始观察所有元素
+                elements.forEach(el => observer.observe(el));
+            }
+        });
+    </script>
+</body>
+</html>
 </html>

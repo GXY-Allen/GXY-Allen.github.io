@@ -35,7 +35,7 @@ jobs:
 
     # 4. 运行你的脚本
     - name: Run build script
-      run: python build.py
+      run: python main.py
 
     # 5. 把生成的 index.html 提交回仓库
     - name: Commit and push changes

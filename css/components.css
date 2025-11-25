@@ -1,0 +1,172 @@
+/* =========================================
+   1. Hero 区域
+   ========================================= */
+.hero { 
+    width: 100%;               
+    height: 250px;             
+    background: #444; 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 20px;
+    flex-shrink: 0;            
+}
+.hero h1 { font-size: 36px; }
+
+
+/* =========================================
+   2. 导航按钮
+   ========================================= */
+.nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #f6f8fa;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid #e1e4e8;
+    transition: all 0.2s;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.nav-btn:hover {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+}
+
+
+/* =========================================
+   3. 侧边栏 Block
+   ========================================= */
+.sidebar-block {
+    background: #fff;          
+    border: 1px solid #e1e4e8; 
+    border-radius: 8px;        
+    padding: 20px;
+    margin-bottom: 20px;       
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+}
+.sidebar-block h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+
+/* =========================================
+   4. 通用白卡片
+   ========================================= */
+.card, .post-card { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    margin-bottom: 15px;
+}
+
+
+/* =========================================
+   5. 首页交互卡片
+   ========================================= */
+.post-card {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+a.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+a.card-link:hover .post-card {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: #999;
+}
+.post-card h2 {
+    margin-top: 0;
+    color: #333;
+    transition: color 0.2s;
+}
+a.card-link:hover .post-card h2 {
+    color: #007bff;
+}
+
+
+/* =========================================
+   6. 日历组件样式 (完整方格版)
+   ========================================= */
+
+.calendar-wrapper {
+    font-size: 14px;
+    color: #333;
+    padding: 0 5px; /* 稍微给点内边距 */
+}
+/* 1. 月份标题 (November 2025) */
+.calendar-header {
+    text-align: center;
+    font-weight: bold;
+    color: #0969da;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+/* 2. 表格布局 */
+.calendar-table {
+    width: 100%;
+    /* 【关键】固定布局，确保每个格子宽度完全一样 */
+    table-layout: fixed; 
+    border-collapse: collapse;
+    text-align: center;
+}
+/* 星期几标题 */
+.calendar-table th {
+    font-size: 0.85em;
+    color: #666;
+    padding-bottom: 8px;
+    font-weight: normal;
+}
+/* 3. 日期格子 (统一样式) */
+.calendar-table td {
+    height: 32px;       /* 【关键】固定高度 */
+    width: 32px;        /* 虽然 table-layout 会自动分宽，但设个参考值更好 */
+    line-height: 32px;  /* 让文字垂直居中 */
+    border-radius: 6px; /* 圆角 */
+    font-size: 0.95em;
+    cursor: default;
+    /* 加上边框让它看起来更像格子（可选，如果不想太乱可以去掉） */
+    /* border: 1px solid transparent; */
+}
+/* 4. 不是本月的日期 (上个月/下个月) */
+.calendar-table td.other-month {
+    color: #aaa;   /* 字体变灰 */
+    opacity: 0.5;  /* 【关键】增加透明度 */
+}
+/* 5. 今天的日期 (高亮) */
+.calendar-table td.today {
+    background-color: #2dba4e; /* GitHub 绿 */
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 0 0 2px #c3e8cd; /* 给一个小光晕，更显眼 */
+}
+/* 6. 普通日期的悬停效果 (浅灰背景) - 保持不变 */
+.calendar-table td:not(.today):hover {
+    background-color: #ebedf0;
+    cursor: pointer;
+    font-weight: bold;
+}
+/* 7. 【新增】今天的悬停效果 (让绿色变深) */
+.calendar-table td.today:hover {
+    background-color: #239a3b; /* 比原来的 #2dba4e 更深一点的绿 */
+    cursor: pointer;
+    /*font-weight: bold;*/
+}

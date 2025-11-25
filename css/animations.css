@@ -1,0 +1,15 @@
+/* =========================================
+   1. 滚动渐入特效
+   ========================================= */
+.reveal-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+}
+.reveal-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+img.reveal-item {
+    transition-delay: 0.2s;
+}
