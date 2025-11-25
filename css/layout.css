@@ -55,19 +55,24 @@
 /* =========================================
    4. 中间列 (滚动区)
    ========================================= */
+/* 中间列 (滚动区) */
 .middle-column {
     flex: 1;                   
     height: 100%;              
     overflow-y: auto;          
     
-    /* 【修改点】将黑色半透明(0,0,0) 改为 白色半透明(255,255,255) */
-    /* 0.5 表示 50% 不透明度，你可以根据喜好在 0.3 ~ 0.8 之间调整 */
-    background-color: rgba(255, 255, 255, 0.5); 
+    /* === 【新增 1】平滑滚动 === */
+    /* 这会让锚点跳转变成“滑过去”的动画，而不是瞬间闪现 */
+    scroll-behavior: smooth;
     
-    /* 【建议新增】加上毛玻璃模糊效果，让背景图不干扰文字 */
+    /* === 【新增 2】跳转后的顶部留白 === */
+    /* 当你跳到某个标题时，它不会死死贴在窗口最顶端，而是留出 20px 的空隙 */
+    scroll-padding-top: 20px;
+
+    /* ... (下面的背景色、毛玻璃等保持不变) ... */
+    background-color: rgba(255, 255, 255, 0.5); 
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-
     display: flex;
     flex-direction: column;
     align-items: center;       

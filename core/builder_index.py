@@ -19,8 +19,17 @@ def build_index_page(posts_metadata, raw_template, common_context):
     page_html = raw_template
     # 首页就在根目录，所以 CSS 路径不用动，保持 template 里的 href="css/..." 即可
     
-    # 首页左侧留空
-    page_html = page_html.replace('{{ sidebar_left }}', "")
+    # 首页左侧：填入头像
+    # 【修改】定义头像 HTML
+    avatar_html = """
+    <div class="avatar-container">
+        <a href="https://github.com/GXY-Allen" target="_blank">
+            <img src="https://github.com/GXY-Allen.png" alt="GXY-Allen" class="avatar-img">
+        </a>
+    </div>
+    """
+    # 【修改】将头像填入 sidebar_left
+    page_html = page_html.replace('{{ sidebar_left }}', avatar_html)
 
     # 右侧填充日历
     page_html = page_html.replace('{{ calendar_widget }}', common_context['calendar'])

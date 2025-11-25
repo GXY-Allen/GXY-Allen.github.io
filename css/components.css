@@ -215,3 +215,136 @@ a.card-link:hover .post-card h2 {
     cursor: pointer;
     /*font-weight: bold;*/
 }
+
+
+/* =========================================
+   11. 左侧头像样式 (迷你左上角版)
+   ========================================= */
+
+.avatar-container {
+    text-align: left; 
+    
+    /* 【修改点 1】去掉内边距，改用负外边距 */
+    /* 因为 sidebar 本身有 20px padding，我们用 -10px 把它往回拉，贴近角落 */
+    padding: 0;
+    margin-left: -5px; 
+    margin-top: -5px;
+    
+    margin-bottom: 15px; 
+}
+
+.avatar-img {
+    /* 【修改点 2】尺寸再次缩小 (80px -> 60px) */
+    width: 50px;        
+    height: 50px;
+    
+    border-radius: 50%; 
+    
+    /* 边框改细一点 (3px -> 2px) */
+    border: 2px solid rgba(255, 255, 255, 0.8); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    
+    object-fit: cover;   
+    transition: all 0.5s ease; 
+}
+
+/* 悬停特效 */
+.avatar-img:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-color: #fff;
+}
+
+
+/* =========================================
+   12. 文章目录样式 (TOC)
+   ========================================= */
+.toc-container {
+    /* 【核心修改 1】让它霸占剩余空间 */
+    /* flex: 1 会让它自动拉伸，填满头像和底部按钮之间的所有空白 */
+    flex: 1; 
+    
+    /* 【核心修改 2】取消最大高度限制 */
+    /* 之前是 max-height: 50vh，现在去掉限制，让它能伸多长伸多长 */
+    max-height: none; 
+    
+    /* 【核心修改 3】内容溢出处理 */
+    /* 当目录内容真的特别长（超过屏幕高度）时，只在这个区域内滚动 */
+    overflow-y: auto;
+    
+    /* 保持之前的微调 */
+    margin-bottom: 20px;
+    padding-left: 0; 
+    margin-left: -5px; 
+    
+    /* 可选：加个最小高度，防止没内容时太扁 */
+    min-height: 100px;
+}
+
+.toc-container h3 {
+    font-size: 1em;
+    color: #999;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.toc-container ul {
+    list-style: none; /* 去掉前面的圆点 */
+    padding: 0;
+    margin: 0;
+}
+
+.toc-item {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+/* 链接样式 */
+.toc-item a {
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9em;
+    display: block; /* 让整行可点 */
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.toc-item a:hover {
+    background-color: rgba(0,0,0,0.05); /* 淡淡的灰背景 */
+    color: #0969da; /* 蓝色高亮 */
+}
+
+/* === 层级缩进 === */
+/* h1: 不缩进，最黑，最粗 */
+.toc-item.h1 { 
+    padding-left: 0; 
+    font-weight: bold; 
+    color: #333;
+    margin-top: 10px; 
+}
+
+/* h2: 【修改点 2】不缩进，但颜色变浅，字重变细 */
+.toc-item.h2 { 
+    padding-left: 0;   /* 取消缩进 */
+    color: #666;       /* 浅灰色 */
+    font-weight: normal;
+    font-size: 0.95em;
+    margin-top: 5px;   /* 稍微留点空隙区分 */
+}
+
+/* h3: 【修改点 3】开始缩进 */
+.toc-item.h3 { 
+    padding-left: 15px; 
+    font-size: 0.9em; 
+    color: #888; 
+}
+
+/* h4: 继续缩进 */
+.toc-item.h4 { 
+    padding-left: 30px; 
+    font-size: 0.85em; 
+    color: #999; 
+    border-left: 2px solid #eee; /* 左侧细线装饰 */
+}
