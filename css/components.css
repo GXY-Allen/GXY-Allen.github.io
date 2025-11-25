@@ -260,35 +260,40 @@ a.card-link:hover .post-card h2 {
    12. 文章目录样式 (TOC)
    ========================================= */
 .toc-container {
-    /* 【核心修改 1】让它霸占剩余空间 */
-    /* flex: 1 会让它自动拉伸，填满头像和底部按钮之间的所有空白 */
+    /* === 布局属性 === */
     flex: 1; 
-    
-    /* 【核心修改 2】取消最大高度限制 */
-    /* 之前是 max-height: 50vh，现在去掉限制，让它能伸多长伸多长 */
     max-height: none; 
-    
-    /* 【核心修改 3】内容溢出处理 */
-    /* 当目录内容真的特别长（超过屏幕高度）时，只在这个区域内滚动 */
     overflow-y: auto;
     
-    /* 保持之前的微调 */
-    margin-bottom: 20px;
-    padding-left: 0; 
+    /* === 样式重置 === */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: 20px; 
+    
+    /* === 【核心修改】宽度调整 === */
+    /* 向左偏移 5px */
     margin-left: -5px; 
     
-    /* 可选：加个最小高度，防止没内容时太扁 */
-    min-height: 100px;
+    /* 【新增】向右拉宽 15px */
+    /* 侧边栏本身有 20px 内边距，这里用负值抵消掉一部分，让目录更宽 */
+    margin-right: -15px; 
 }
 
+/* 目录标题 */
 .toc-container h3 {
-    font-size: 1em;
-    color: #999;
+    margin-top: 0;
+    font-size: 1em; /* 字体改小一点，更精致 */
+    color: #999;    /* 颜色改淡，作为修饰 */
     margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    
+    /* 保留一条淡淡的底线，作为分割 */
+    border-bottom: 1px solid rgba(0,0,0,0.05); 
     padding-bottom: 5px;
+    
+    padding-left: 5px; /* 稍微缩进对齐 */
 }
-
 .toc-container ul {
     list-style: none; /* 去掉前面的圆点 */
     padding: 0;
