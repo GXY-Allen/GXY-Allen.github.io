@@ -2,17 +2,42 @@
    1. Hero 区域
    ========================================= */
 .hero { 
-    width: 100%;               
+    width: 96%;               
+    max-width: 1000px;        
     height: 250px;             
-    background: #444; 
+    border-radius: 8px;       
+    margin-top: 20px;         
+    margin-bottom: 20px;      
+    
+    /* 【修改点 1】白色遮罩调得很浅 (0.1) */
+    /* 这样只会给图片增加一点点“空气感”和亮度，不会发白 */
+    background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), 
+                url('../pages/images/banner.jpg') no-repeat center center;
+    background-size: cover;   
+    
+    opacity: 0.9;
+    
+    /* 【修改点 2】保持白色文字 */
     color: white; 
+    
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    margin-bottom: 20px;
-    flex-shrink: 0;            
+    flex-shrink: 0;           
+    
+    /* 【关键点】给白色文字加重阴影 */
+    /* 因为背景有一层白雾，必须用深色阴影把字“托”出来，否则看不清 */
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-.hero h1 { font-size: 36px; }
+
+.hero h1 { 
+    font-size: 36px; 
+    margin: 0; 
+    font-weight: bold;
+    letter-spacing: 1px; /* 稍微加点字间距，更显大气 */
+}
 
 
 /* =========================================
@@ -24,21 +49,32 @@
     justify-content: center;
     width: 100%;
     padding: 12px 0;
-    background-color: #f6f8fa;
-    color: #333;
+    
+    /* 背景改为稍微透明的浅灰，更融合 */
+    background-color: rgba(246, 248, 250, 0.8); 
+    color: #555; /* 文字深灰，不刺眼 */
+    
     text-decoration: none;
     border-radius: 8px;
-    border: 1px solid #e1e4e8;
-    transition: all 0.2s;
+    border: 1px solid rgba(0,0,0,0.1); /* 边框也淡一点 */
+    transition: all 0.3s ease; /* 动画慢一点，更优雅 */
     font-weight: bold;
     box-sizing: border-box;
 }
+
+/* 导航按钮 (悬停态) */
 .nav-btn:hover {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+    /* 【修改】背景变深灰 (呼应顶部 Header)，而不是亮蓝 */
+    background-color: #444; 
+    
+    /* 文字变白 */
+    color: #fff;              
+    
+    border-color: #444;
+    transform: translateY(-2px); 
+    
+    /* 阴影改为淡淡的黑影 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 

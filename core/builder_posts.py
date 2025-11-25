@@ -42,7 +42,7 @@ def build_all_posts(raw_template, common_context):
             # 记得加上 id="article-content" 配合你的 JS 动画
             page_html = page_html.replace(
                 '{{ content }}', 
-                f"<div class='card' id='article-content'>{html_content}</div>"
+                f"<div class='card'>{html_content}</div>"
             )
 
             with open(os.path.join(config.OUTPUT_DIR, f"{name}.html"), 'w', encoding='utf-8') as f:
