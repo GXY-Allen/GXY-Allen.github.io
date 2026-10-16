@@ -1,0 +1,16 @@
+---
+import Icon from './Icon.astro';
+---
+<div class="overlay" data-overlay="search" hidden></div>
+<div class="search-modal" id="search-modal" role="dialog" aria-modal="true" aria-label="搜索" aria-hidden="true">
+  <div class="search-panel glass">
+    <div class="search-input-wrap">
+      <Icon name="search" size={20} />
+      <input type="search" class="search-input" placeholder="搜索文章标题、内容…" autocomplete="off" spellcheck="false" aria-label="搜索关键词" />
+      <button class="icon-btn sm" data-close aria-label="关闭搜索"><kbd>Esc</kbd></button>
+    </div>
+    <div class="search-results" aria-live="polite">
+      <p class="search-tip">输入关键词开始搜索，支持中文 · <kbd>↑</kbd><kbd>↓</kbd> 选择 · <kbd>Enter</kbd> 打开</p>
+    </div>
+  </div>
+</div>

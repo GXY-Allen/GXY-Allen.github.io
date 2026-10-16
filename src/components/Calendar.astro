@@ -1,0 +1,15 @@
+---
+import Icon from './Icon.astro';
+---
+<section class="widget glass calendar" data-reveal>
+  <div class="widget-head">
+    <h2 class="widget-title"><Icon name="calendar" size={17} /> <span class="cal-title">日历</span></h2>
+    <div class="cal-nav">
+      <button class="icon-btn sm" data-cal="prev" aria-label="上个月"><Icon name="chevron-left" size={16} /></button>
+      <button class="icon-btn sm" data-cal="today" aria-label="回到本月"><Icon name="reset" size={14} /></button>
+      <button class="icon-btn sm" data-cal="next" aria-label="下个月"><Icon name="chevron-right" size={16} /></button>
+    </div>
+  </div>
+  <div class="cal-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+  <div class="cal-grid" aria-live="polite"></div>
+</section>

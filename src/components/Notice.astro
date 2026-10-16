@@ -1,0 +1,14 @@
+---
+import { SITE } from '../site.config';
+import Icon from './Icon.astro';
+---
+{
+  SITE.notice && (
+    <section class="widget glass notice" data-reveal>
+      <div class="widget-head">
+        <h2 class="widget-title"><Icon name="megaphone" size={17} /> 公告</h2>
+      </div>
+      <p class="notice-text" set:html={SITE.notice} />
+    </section>
+  )
+}

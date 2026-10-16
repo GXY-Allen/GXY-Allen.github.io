@@ -1,0 +1,29 @@
+---
+import { getTags } from '../utils/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+  limit?: number;
+}
+const { limit = 30 } = Astro.props;
+const tags = await getTags();
+const shown = tags.slice(0, limit);
+const max = Math.max(1, ...shown.map((t) => t.posts.length));
+---
+{
+  tags.length > 0 && (
+    <section class="widget glass" data-reveal>
+      <div class="widget-head">
+        <h2 class="widget-title"><Icon name="tag" size={17} /> 标签</h2>
+        {tags.length > limit && <a class="widget-more" href="/tags/">更多 <Icon name="chevron-right" size={14} /></a>}
+      </div>
+      <div class="tag-cloud">
+        {shown.map((t) => (
+          <a href={t.url} class="chip" style={`--w:${0.85 + (t.posts.length / max) * 0.3}`} data-ripple>
+            #{t.name}<sup>{t.posts.length}</sup>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}

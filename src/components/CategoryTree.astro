@@ -1,0 +1,21 @@
+---
+import { getCategoryTree } from '../utils/posts';
+import Icon from './Icon.astro';
+import CategoryNode from './CategoryNode.astro';
+
+interface Props {
+  current?: string;
+}
+const { current } = Astro.props;
+const tree = await getCategoryTree();
+---
+<section class="widget glass cat-widget" data-reveal>
+  <div class="widget-head">
+    <h2 class="widget-title"><Icon name="folder" size={17} /> 分类</h2>
+    <a class="widget-more" href="/categories/">全部 <Icon name="chevron-right" size={14} /></a>
+  </div>
+  {tree.length === 0 && <p class="empty-tip">还没有分类，在 posts 下新建文件夹即可</p>}
+  <ul class="cat-tree">
+    {tree.map((n) => <CategoryNode node={n} current={current} />)}
+  </ul>
+</section>

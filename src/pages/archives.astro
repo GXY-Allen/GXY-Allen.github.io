@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { getPosts, getStats, dayKey, formatWords, type Post } from '../utils/posts';
+
+const posts = await getPosts();
+const stats = await getStats();
+const years = new Map<string, Map<string, Post[]>>();
+for (const p of posts) {
+  const k = dayKey(p.date);
+  const y = k.slice(0, 4);
+  const m = k.slice(5, 7);
+  if (!years.has(y)) years.set(y, new Map());
+  const months = years.get(y)!;
+  if (!months.has(m)) months.set(m, []);
+  months.get(m)!.push(p);
+}
+const seen = new Set<string>();
+const dayId = (p: Post) => {
+  const k = dayKey(p.date);
+  if (seen.has(k)) return undefined;
+  seen.add(k);
+  return `d-${k}`;
+};
+---
+<BaseLayout title="归档" description="按时间排列的全部文章">
+  <PageHeader title="归档" icon="archive" subtitle={`共 ${stats.posts} 篇文章，${formatWords(stats.words)} 字，继续加油！`} crumbs={[{ name: '归档' }]} />
+  <section class="glass timeline-card">
+    {
+      [...years].map(([y, months]) => (
+        <div class="tl-year" data-reveal>
+          <h2 class="tl-year-title">{y}<small>{[...months.values()].reduce((s, l) => s + l.length, 0)} 篇</small></h2>
+          {[...months].map(([m, list]) => (
+            <div class="tl-month">
+              <h3 class="tl-month-title">{Number(m)} 月</h3>
+              <ol class="tl-list">
+                {list.map((p, i) => (
+                  <li id={dayId(p)} class="tl-item" data-reveal style={`--i:${i % 8}`}>
+                    <a href={p.url} data-ripple>
+                      <time datetime={p.date.toISOString()}>{dayKey(p.date).slice(5)}</time>
+                      <span class="tl-title">{p.title}</span>
+                      <span class="tl-cat">{p.category.join(' / ')}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      ))
+    }
+    {posts.length === 0 && <p class="empty-tip">还没有文章～</p>}
+  </section>
+</BaseLayout>

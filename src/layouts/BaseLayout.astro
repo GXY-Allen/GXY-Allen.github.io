@@ -1,0 +1,218 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { SITE } from '../site.config';
+import Topbar from '../components/Topbar.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import CategoryTree from '../components/CategoryTree.astro';
+import TagCloud from '../components/TagCloud.astro';
+import Notice from '../components/Notice.astro';
+import Calendar from '../components/Calendar.astro';
+import Heatmap from '../components/Heatmap.astro';
+import RecentPosts from '../components/RecentPosts.astro';
+import SiteStats from '../components/SiteStats.astro';
+import SearchBox from '../components/SearchBox.astro';
+import Footer from '../components/Footer.astro';
+import Fabs from '../components/Fabs.astro';
+import Drawer from '../components/Drawer.astro';
+import SettingsPanel from '../components/SettingsPanel.astro';
+import SearchModal from '../components/SearchModal.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { getActivity } from '../utils/posts';
+
+import 'katex/dist/katex.min.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/layout.css';
+import '../styles/components.css';
+import '../styles/prose.css';
+import '../styles/animations.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  /** home 首页 / post 文章 / page 其他页面 */
+  variant?: 'home' | 'post' | 'page';
+  /** 当前所在分类（用于左栏高亮） */
+  currentCategory?: string;
+  hasToc?: boolean;
+  article?: { published: Date; modified: Date; tags: string[] };
+}
+
+const {
+  title,
+  description = SITE.description,
+  image,
+  variant = 'page',
+  currentCategory,
+  hasToc = false,
+  article,
+} = Astro.props;
+
+const fullTitle = title ? `${title} | ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
+const ogImage = new URL(image ?? SITE.banner ?? SITE.author.avatar, Astro.site ?? SITE.url).href;
+const activity = await getActivity();
+const activityJson = JSON.stringify(activity).replace(/</g, '\\' + 'u003c');
+
+const settingsDefaults = {
+  mode: SITE.appearance.mode,
+  primary: SITE.appearance.primary,
+  bg: SITE.appearance.background,
+  bgCustom: '',
+  bgBlur: SITE.appearance.backgroundBlur,
+  cardOpacity: SITE.appearance.cardOpacity,
+  fontSize: SITE.appearance.fontSize,
+  live2d: SITE.features.live2d.enable,
+};
+const backgrounds = SITE.backgrounds;
+
+const pageAnim = {
+  forwards: {
+    old: { name: 'pageOut', duration: '160ms', easing: 'ease-in', fillMode: 'both' },
+    new: { name: 'pageIn', duration: '420ms', easing: 'cubic-bezier(.22,1,.36,1)', fillMode: 'both' },
+  },
+  backwards: {
+    old: { name: 'pageOut', duration: '160ms', easing: 'ease-in', fillMode: 'both' },
+    new: { name: 'pageIn', duration: '420ms', easing: 'cubic-bezier(.22,1,.36,1)', fillMode: 'both' },
+  },
+};
+---
+<!doctype html>
+<html lang={SITE.lang} data-theme="light" data-motion="on">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.author.name} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content={SITE.appearance.primary} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article && <meta property="article:modified_time" content={article.modified.toISOString()} />}
+    {article?.tags.map((t) => <meta property="article:tag" content={t} />)}
+
+    <!-- 在页面渲染前应用外观设置，避免闪烁 -->
+    <script is:inline define:vars={{ settingsDefaults, backgrounds }}>
+      (function () {
+        var KEY = 'blog-settings';
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var D = Object.assign({ motion: !reduce }, settingsDefaults);
+        function stored() {
+          try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
+        }
+        function read() { return Object.assign({}, D, stored()); }
+        function bgOf(s) {
+          if (s.bg === 'custom' && s.bgCustom) return { kind: 'image', css: 'url("' + s.bgCustom.replace(/"/g, '%22') + '")' };
+          if (s.bg === 'upload') {
+            try { var d = localStorage.getItem('blog-bg-upload'); if (d) return { kind: 'image', css: 'url("' + d + '")' }; } catch (e) {}
+          }
+          var p = backgrounds.find(function (b) { return b.id === s.bg; }) || backgrounds.find(function (b) { return b.id === D.bg; }) || backgrounds[0];
+          return { kind: p.type, css: p.type === 'image' ? 'url("' + p.value + '")' : p.value };
+        }
+        function apply() {
+          var s = read();
+          var root = document.documentElement;
+          root.classList.add('js');
+          var dark = s.mode === 'dark' || (s.mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          root.dataset.theme = dark ? 'dark' : 'light';
+          root.dataset.mode = s.mode;
+          root.dataset.motion = s.motion ? 'on' : 'off';
+          var bg = bgOf(s);
+          root.dataset.bg = bg.kind;
+          var st = root.style;
+          st.setProperty('--primary', s.primary);
+          st.setProperty('--bg-value', bg.css);
+          st.setProperty('--bg-blur', (+s.bgBlur || 0) + 'px');
+          st.setProperty('--card-alpha', String(s.cardOpacity));
+          st.setProperty('--article-size', s.fontSize + 'px');
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', dark ? '#12141c' : s.primary);
+        }
+        window.__blog = {
+          KEY: KEY,
+          defaults: D,
+          backgrounds: backgrounds,
+          read: read,
+          apply: apply,
+          save: function (patch) {
+            var s = Object.assign(stored(), patch);
+            try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
+            apply();
+            window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
+          },
+          reset: function () {
+            try { localStorage.removeItem(KEY); localStorage.removeItem('blog-bg-upload'); } catch (e) {}
+            apply();
+            window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
+          },
+        };
+        apply();
+        if (!window.__blogBoot) {
+          window.__blogBoot = true;
+          document.addEventListener('astro:after-swap', apply);
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+        }
+      })();
+    </script>
+    <ClientRouter fallback="animate" />
+  </head>
+  <body data-variant={variant}>
+    <div id="bg" class="bg-layer" transition:persist="bg" aria-hidden="true"><div class="bg-image"></div></div>
+    <div id="read-progress" class="read-progress" aria-hidden="true"></div>
+    <a class="skip-link" href="#main">跳到正文</a>
+
+    <Topbar />
+
+    <div class={`layout layout-${variant}`}>
+      <aside class="side side-left" transition:name="side-left" transition:animate="none" aria-label="侧边栏">
+        <div class="side-inner">
+          <ProfileCard />
+          <CategoryTree current={currentCategory} />
+          <TagCloud limit={24} />
+        </div>
+      </aside>
+
+      <main id="main" class="main" transition:animate={pageAnim}>
+        <slot />
+      </main>
+
+      <aside class="side side-right" transition:name="side-right" transition:animate="none" aria-label="工具栏">
+        <div class="side-inner">
+          <slot name="right-top" />
+          <SearchBox />
+          {variant !== 'post' && <Notice />}
+          <Calendar />
+          {SITE.features.heatmap && <Heatmap />}
+          <RecentPosts />
+          <SiteStats />
+        </div>
+      </aside>
+    </div>
+
+    <Footer />
+    <Fabs hasToc={hasToc} />
+    <slot name="overlay" />
+    <Drawer current={currentCategory} />
+    <SettingsPanel />
+    <SearchModal />
+    <Lightbox />
+    <div id="waifu-host" transition:persist="waifu"></div>
+
+    <script type="application/json" id="activity-data" set:html={activityJson} />
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>

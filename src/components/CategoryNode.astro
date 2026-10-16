@@ -1,0 +1,37 @@
+---
+import type { CategoryNode } from '../utils/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+  node: CategoryNode;
+  current?: string;
+}
+const { node: n, current } = Astro.props;
+const open = !!current && (current === n.key || current.startsWith(n.key + '/'));
+const hasChildren = n.children.length > 0;
+---
+<li class:list={['cat-item', { open, current: current === n.key, 'has-children': hasChildren }]} data-key={n.key}>
+  <div class="cat-row">
+    <a href={n.url} class="cat-link" data-ripple aria-current={current === n.key ? 'page' : undefined}>
+      <span class="cat-icon">{n.icon ? n.icon : <Icon name="folder" size={16} />}</span>
+      <span class="cat-name">{n.name}</span>
+      <span class="cat-count">{n.count}</span>
+    </a>
+    {
+      hasChildren && (
+        <button class="cat-toggle" aria-label={`展开或收起 ${n.name}`} aria-expanded={String(open)}>
+          <Icon name="chevron-down" size={15} />
+        </button>
+      )
+    }
+  </div>
+  {
+    hasChildren && (
+      <div class="cat-children">
+        <ul>
+          {n.children.map((c) => <Astro.self node={c} current={current} />)}
+        </ul>
+      </div>
+    )
+  }
+</li>

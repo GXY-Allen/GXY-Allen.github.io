@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getTags } from '../../utils/posts';
+
+const tags = await getTags();
+const max = Math.max(1, ...tags.map((t) => t.posts.length));
+---
+<BaseLayout title="标签" description="所有文章标签">
+  <PageHeader title="标签" icon="tag" subtitle={`共 ${tags.length} 个标签 · 在文章开头写 tags: [标签1, 标签2] 即可`} crumbs={[{ name: '标签' }]} />
+  <section class="glass tag-wall" data-reveal>
+    {tags.length === 0 && <p class="empty-tip">还没有标签</p>}
+    {
+      tags.map((t, i) => (
+        <a href={t.url} class="chip lg" style={`--w:${0.9 + (t.posts.length / max) * 0.6};--h:${(i * 53) % 360}`} data-ripple>
+          #{t.name}<sup>{t.posts.length}</sup>
+        </a>
+      ))
+    }
+  </section>
+</BaseLayout>

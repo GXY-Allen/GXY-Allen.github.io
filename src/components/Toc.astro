@@ -1,0 +1,35 @@
+---
+import Icon from './Icon.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+  variant?: 'side' | 'popover';
+}
+const { headings, variant = 'side' } = Astro.props;
+const items = headings.filter((h) => h.depth >= 2 && h.depth <= 4 && h.slug !== 'footnote-label');
+const minDepth = Math.min(...items.map((h) => h.depth), 4);
+---
+{
+  items.length > 0 && (
+    <nav class:list={['toc', `toc-v-${variant}`, { 'widget glass': variant === 'side' }]} aria-label="文章目录">
+      <div class="widget-head">
+        <h2 class="widget-title"><Icon name="list" size={17} /> 目录</h2>
+        <span class="toc-percent" aria-hidden="true">0%</span>
+      </div>
+      <div class="toc-scroll">
+        <ol class="toc-list">
+          {items.map((h) => (
+            <li class="toc-item" style={`--lv:${h.depth - minDepth}`}>
+              <a href={`#${h.slug}`} data-slug={h.slug}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </nav>
+  )
+}

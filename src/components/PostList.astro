@@ -1,0 +1,14 @@
+---
+import type { Post } from '../utils/posts';
+import PostCard from './PostCard.astro';
+
+interface Props {
+  posts: Post[];
+  showPinned?: boolean;
+}
+const { posts, showPinned = false } = Astro.props;
+---
+<div class="post-list">
+  {posts.map((p, i) => <PostCard post={p} index={i} showPinned={showPinned} />)}
+  {posts.length === 0 && <div class="glass empty-card">这里还没有文章～</div>}
+</div>

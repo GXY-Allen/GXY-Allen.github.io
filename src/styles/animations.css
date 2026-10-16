@@ -1,0 +1,190 @@
+/* ============ 动画 ============ */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes pageOut {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  85% {
+    transform: rotate(-12deg);
+  }
+  90% {
+    transform: rotate(10deg);
+  }
+  95% {
+    transform: rotate(-6deg);
+  }
+}
+@keyframes growX {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes flash {
+  50% {
+    background: color-mix(in srgb, var(--primary) 30%, transparent);
+  }
+}
+@keyframes calLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+@keyframes calRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+@keyframes toastIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.9);
+  }
+  12%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+}
+
+/* 滚动显现：只有脚本运行后才隐藏，保证无 JS 时内容可见 */
+html.js[data-motion='on'] [data-reveal]:not(.revealed) {
+  opacity: 0;
+  transform: translateY(24px);
+}
+html.js[data-motion='on'] [data-reveal] {
+  transition:
+    opacity 0.7s var(--ease),
+    transform 0.7s var(--ease),
+    box-shadow 0.4s var(--ease);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+html.js[data-motion='on'] [data-reveal].revealed {
+  transition-delay: 0s;
+}
+/* 卡片有自己的 transform（3D 倾斜），显现结束后交还 */
+html.js[data-motion='on'] .post-card[data-reveal].revealed,
+html.js[data-motion='on'] .cat-card[data-reveal].revealed,
+html.js[data-motion='on'] .series-box[data-reveal].revealed {
+  transition:
+    opacity 0.7s var(--ease),
+    transform 0.5s var(--ease),
+    box-shadow 0.4s var(--ease);
+}
+
+html.js[data-motion='on'] .prose > .reveal-item:not(.revealed) {
+  opacity: 0;
+  transform: translateY(16px);
+}
+html.js[data-motion='on'] .prose > .reveal-item {
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.6s var(--ease);
+}
+
+/* 关闭动效 */
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+html[data-motion='off']::view-transition-group(*),
+html[data-motion='off']::view-transition-old(*),
+html[data-motion='off']::view-transition-new(*) {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-down,
+  .nf-code,
+  .notice .widget-title .icon {
+    animation: none;
+  }
+}
+
+/* 明暗切换：圆形扩散 */
+html.theme-switching * {
+  view-transition-name: none !important;
+}
+html.theme-switching::view-transition-old(root),
+html.theme-switching::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.theme-switching::view-transition-new(root) {
+  z-index: 2;
+}

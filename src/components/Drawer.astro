@@ -1,0 +1,36 @@
+---
+import { SITE } from '../site.config';
+import Icon from './Icon.astro';
+import ProfileCard from './ProfileCard.astro';
+import CategoryTree from './CategoryTree.astro';
+import TagCloud from './TagCloud.astro';
+
+interface Props {
+  current?: string;
+}
+const { current } = Astro.props;
+const path = Astro.url.pathname;
+---
+<div class="overlay" data-overlay="drawer" hidden></div>
+<aside class="drawer" id="drawer" aria-label="菜单" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="drawer-title">{SITE.title}</span>
+    <button class="icon-btn" data-close aria-label="关闭菜单"><Icon name="x" size={20} /></button>
+  </div>
+  <div class="drawer-body">
+    <ProfileCard compact />
+    <nav class="drawer-nav widget glass">
+      {
+        SITE.nav.map((item) => (
+          <a href={item.href} class:list={['drawer-link', { active: item.href === '/' ? path === '/' : path.startsWith(item.href) }]} data-ripple>
+            <Icon name={item.icon} size={18} />
+            <span>{item.name}</span>
+            <Icon name="chevron-right" size={16} class="drawer-arrow" />
+          </a>
+        ))
+      }
+    </nav>
+    <CategoryTree current={current} />
+    <TagCloud limit={20} />
+  </div>
+</aside>

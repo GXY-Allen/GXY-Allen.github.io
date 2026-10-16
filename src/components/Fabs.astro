@@ -1,0 +1,23 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  hasToc?: boolean;
+}
+const { hasToc = false } = Astro.props;
+---
+<div class="fabs" id="fabs">
+  {
+    hasToc && (
+      <button class="fab fab-toc" data-open="toc" aria-label="文章目录" title="文章目录">
+        <Icon name="list" size={20} />
+      </button>
+    )
+  }
+  <button class="fab fab-top" data-action="top" aria-label="回到顶部" title="回到顶部">
+    <svg class="fab-ring" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" pathLength="100"></circle>
+    </svg>
+    <Icon name="arrow-up" size={20} />
+  </button>
+</div>

@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+---
+<BaseLayout title="搜索" description="搜索站内文章">
+  <PageHeader title="搜索" icon="search" crumbs={[{ name: '搜索' }]} />
+  <section class="glass section-card search-page" data-search-page>
+    <div class="search-input-wrap">
+      <Icon name="search" size={20} />
+      <input type="search" class="search-input" placeholder="搜索文章标题、内容…" autocomplete="off" aria-label="搜索关键词" />
+    </div>
+    <div class="search-results" aria-live="polite"></div>
+  </section>
+</BaseLayout>

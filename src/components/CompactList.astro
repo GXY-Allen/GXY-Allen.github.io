@@ -1,0 +1,25 @@
+---
+import type { Post } from '../utils/posts';
+import { formatDate } from '../utils/posts';
+
+interface Props {
+  posts: Post[];
+  numbered?: boolean;
+  showCategory?: boolean;
+}
+const { posts, numbered = false, showCategory = true } = Astro.props;
+---
+<ol class:list={['compact-list', { numbered }]}>
+  {
+    posts.map((p, i) => (
+      <li data-reveal style={`--i:${i % 8}`}>
+        <a href={p.url} class="compact-item" data-ripple>
+          {numbered && <span class="compact-no">{i + 1}</span>}
+          <time datetime={p.date.toISOString()}>{formatDate(p.date)}</time>
+          <span class="compact-title">{p.title}</span>
+          {showCategory && <span class="compact-cat">{p.category.join(' / ')}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ol>

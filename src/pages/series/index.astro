@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Icon from '../../components/Icon.astro';
+import { getSeries, formatDate, formatWords } from '../../utils/posts';
+
+const series = await getSeries();
+---
+<BaseLayout title="专栏" description="系列文章合集">
+  <PageHeader title="专栏" icon="layers" subtitle={`共 ${series.length} 个专栏 · 在文章开头写 series: 专栏名 即可加入专栏`} crumbs={[{ name: '专栏' }]} />
+  {series.length === 0 && <div class="glass empty-card">还没有专栏～</div>}
+  <div class="series-grid">
+    {
+      series.map((s, i) => (
+        <section class="series-box glass" data-reveal data-tilt style={`--i:${i % 6}`}>
+          <a href={s.url} class="series-box-head">
+            <span class="series-box-icon"><Icon name="book" size={22} /></span>
+            <span>
+              <h2>{s.name}</h2>
+              <small>{s.posts.length} 篇 · {formatWords(s.words)} 字 · 更新于 {formatDate(s.updated)}</small>
+            </span>
+          </a>
+          <ol class="series-list">
+            {s.posts.slice(0, 5).map((p, j) => (
+              <li><a href={p.url}><span class="series-no">{j + 1}</span>{p.title}</a></li>
+            ))}
+          </ol>
+          {s.posts.length > 5 && <a class="widget-more" href={s.url}>查看全部 {s.posts.length} 篇 <Icon name="chevron-right" size={14} /></a>}
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

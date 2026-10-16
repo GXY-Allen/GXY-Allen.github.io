@@ -1,0 +1,31 @@
+---
+import { SITE } from '../site.config';
+import Icon from './Icon.astro';
+
+const year = new Date().getFullYear();
+const startYear = new Date(SITE.since).getFullYear();
+---
+<footer class="site-footer" transition:name="footer" transition:animate="none">
+  <div class="footer-inner glass">
+    <div class="footer-line">
+      © {startYear === year ? year : `${startYear} - ${year}`} <a href="/about/">{SITE.author.name}</a>
+      <span class="dot">·</span>
+      <span>已运行 <b data-since={SITE.since}>-</b> 天</span>
+      {
+        SITE.features.busuanzi && (
+          <span class="bsz-item">
+            <span class="dot">·</span>
+            <Icon name="eye" size={14} /> <span class="bsz" data-bsz="site_pv">…</span> 次访问
+          </span>
+        )
+      }
+    </div>
+    <div class="footer-line sub">
+      <a href="/rss.xml"><Icon name="rss" size={14} /> RSS</a>
+      <span class="dot">·</span>
+      <a href="/sitemap-index.xml">站点地图</a>
+      <span class="dot">·</span>
+      <span>Powered by <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> & GitHub Pages</span>
+    </div>
+  </div>
+</footer>

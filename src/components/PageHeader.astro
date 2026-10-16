@@ -1,0 +1,43 @@
+---
+import type { ImageMetadata } from 'astro';
+import Icon from './Icon.astro';
+import Cover from './Cover.astro';
+
+interface Crumb {
+  name: string;
+  href?: string;
+}
+interface Props {
+  title: string;
+  icon?: string;
+  emoji?: string;
+  subtitle?: string;
+  crumbs?: Crumb[];
+  cover?: ImageMetadata | string;
+}
+const { title, icon = 'sparkles', emoji, subtitle, crumbs = [], cover } = Astro.props;
+---
+<header class:list={['page-header glass', { 'has-cover': !!cover }]} data-reveal>
+  {cover && <div class="page-header-cover"><Cover src={cover} alt="" width={1200} eager /></div>}
+  <div class="page-header-inner">
+    {
+      crumbs.length > 0 && (
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="/"><Icon name="home" size={14} /> 首页</a>
+          {crumbs.map((c) => (
+            <>
+              <Icon name="chevron-right" size={13} class="sep" />
+              {c.href ? <a href={c.href}>{c.name}</a> : <span>{c.name}</span>}
+            </>
+          ))}
+        </nav>
+      )
+    }
+    <h1 class="page-title">
+      <span class="page-title-icon">{emoji ? emoji : <Icon name={icon} size={26} />}</span>
+      {title}
+    </h1>
+    {subtitle && <p class="page-subtitle">{subtitle}</p>}
+    <slot />
+  </div>
+</header>

@@ -1,0 +1,345 @@
+{
+  "mouseover": [
+    {
+      "selector": "#waifu-tool-hitokoto",
+      "text": [
+        "猜猜我要说些什么？",
+        "要听我讲一句好听的话吗？"
+      ]
+    },
+    {
+      "selector": "#waifu-tool-switch-model",
+      "text": [
+        "要见见我的姐姐妹妹吗？",
+        "要切换看板娘吗？"
+      ]
+    },
+    {
+      "selector": "#waifu-tool-switch-texture",
+      "text": [
+        "换一身衣服吧！",
+        "变装！",
+        "这次要扮演什么呢？"
+      ]
+    },
+    {
+      "selector": "#waifu-tool-photo",
+      "text": [
+        "要给我拍照吗？一二三～茄子～",
+        "保持微笑就好了～"
+      ]
+    },
+    {
+      "selector": "#waifu-tool-info",
+      "text": [
+        "想知道更多关于我的事吗？"
+      ]
+    },
+    {
+      "selector": "#waifu-tool-quit",
+      "text": [
+        "到了要说再见的时候了吗？",
+        "不要丢下我呀……",
+        "我们还会再见面的吧？"
+      ]
+    },
+    {
+      "selector": ".brand, .nav-link[href=\"/\"]",
+      "text": [
+        "点它就可以回到首页啦！",
+        "回首页看看吧～"
+      ]
+    },
+    {
+      "selector": "a[href=\"/about/\"]",
+      "text": [
+        "想知道我家主人是谁吗？",
+        "这里有主人的小秘密哦～"
+      ]
+    },
+    {
+      "selector": ".nav-link[href=\"/categories/\"], .widget-more[href=\"/categories/\"]",
+      "text": [
+        "文章都分好类啦～",
+        "按分类找文章会更快哦！"
+      ]
+    },
+    {
+      "selector": ".nav-link[href=\"/tags/\"]",
+      "text": [
+        "点击来查看所有标签哦。"
+      ]
+    },
+    {
+      "selector": ".nav-link[href=\"/series/\"]",
+      "text": [
+        "专栏里的文章要按顺序读哦！",
+        "这里是系列文章～"
+      ]
+    },
+    {
+      "selector": ".nav-link[href=\"/archives/\"]",
+      "text": [
+        "翻页太麻烦？来看看文章归档吧。",
+        "所有文章都按时间整理在这里啦！"
+      ]
+    },
+    {
+      "selector": ".search-trigger, .search-box",
+      "text": [
+        "找不到想看的内容？搜索看看吧！",
+        "按 Ctrl + K 也可以快速搜索哦～"
+      ]
+    },
+    {
+      "selector": ".theme-toggle",
+      "text": [
+        "眼睛累了吗？切换成深色模式试试～",
+        "要开灯还是关灯呢？"
+      ]
+    },
+    {
+      "selector": "[data-open=\"settings\"]",
+      "text": [
+        "这里可以换主题色和背景哦！",
+        "想让博客换个样子吗？"
+      ]
+    },
+    {
+      "selector": ".profile-avatar",
+      "text": [
+        "我家主人好看吗？",
+        "这是我家主人 (*´∇｀*)"
+      ]
+    },
+    {
+      "selector": ".profile-stats",
+      "text": [
+        "这是文章的统计信息～"
+      ]
+    },
+    {
+      "selector": ".post-card-title a",
+      "text": [
+        "要看看 <span>{text}</span> 这篇文章吗？",
+        "这篇 <span>{text}</span> 写得不错哦～"
+      ]
+    },
+    {
+      "selector": ".cat-link",
+      "text": [
+        "要去看看 <span>{text}</span> 分类吗？"
+      ]
+    },
+    {
+      "selector": ".chip",
+      "text": [
+        "要去看看 <span>{text}</span> 标签吗？"
+      ]
+    },
+    {
+      "selector": ".cal-day.has",
+      "text": [
+        "这一天主人写了文章哦，点进去看看！"
+      ]
+    },
+    {
+      "selector": ".hm-cell",
+      "text": [
+        "颜色越深，说明那天写得越多哦！",
+        "主人有没有偷懒呢？"
+      ]
+    },
+    {
+      "selector": ".code-copy",
+      "text": [
+        "代码可以直接点击复制哟。"
+      ]
+    },
+    {
+      "selector": ".prose img",
+      "text": [
+        "点击图片可以放大呢！"
+      ]
+    },
+    {
+      "selector": ".fab-top",
+      "text": [
+        "点它就可以回到顶部啦！",
+        "要回到开始的地方吗？"
+      ]
+    },
+    {
+      "selector": ".fab-toc, .toc",
+      "text": [
+        "用目录可以快速跳转哦～"
+      ]
+    },
+    {
+      "selector": ".pn-card.next",
+      "text": [
+        "来看看下一篇文章吧。"
+      ]
+    },
+    {
+      "selector": ".pn-card.prev",
+      "text": [
+        "来看看上一篇文章吧。"
+      ]
+    },
+    {
+      "selector": "a[href^=\"http\"]",
+      "text": [
+        "要去看看 <span>{text}</span> 吗？"
+      ]
+    }
+  ],
+  "click": [],
+  "seasons": [
+    {
+      "date": "01/01",
+      "text": "<span>元旦</span>了呢，新的一年又开始了，今年是{year}年～"
+    },
+    {
+      "date": "02/14",
+      "text": "又是一年<span>情人节</span>，{year}年找到对象了嘛～"
+    },
+    {
+      "date": "03/08",
+      "text": "今天是<span>国际妇女节</span>！"
+    },
+    {
+      "date": "03/12",
+      "text": "今天是<span>植树节</span>，要保护环境呀！"
+    },
+    {
+      "date": "04/01",
+      "text": "悄悄告诉你一个秘密～<span>今天是愚人节，不要被骗了哦～</span>"
+    },
+    {
+      "date": "05/01",
+      "text": "今天是<span>五一劳动节</span>，计划好假期去哪里了吗～"
+    },
+    {
+      "date": "06/01",
+      "text": "<span>儿童节</span>了呢，快活的时光总是短暂，要是永远长不大该多好啊…"
+    },
+    {
+      "date": "09/03",
+      "text": "<span>中国人民抗日战争胜利纪念日</span>，铭记历史、缅怀先烈、珍爱和平、开创未来。"
+    },
+    {
+      "date": "09/10",
+      "text": "<span>教师节</span>，在学校要给老师问声好呀～"
+    },
+    {
+      "date": "10/01",
+      "text": "<span>国庆节</span>到了，为祖国母亲庆生！"
+    },
+    {
+      "date": "11/05-11/12",
+      "text": "今年的<span>双十一</span>是和谁一起过的呢～"
+    },
+    {
+      "date": "12/20-12/31",
+      "text": "这几天是<span>圣诞节</span>，主人肯定又去剁手买买买了～"
+    }
+  ],
+  "time": [
+    {
+      "hour": "6-7",
+      "text": "早上好！一日之计在于晨，美好的一天就要开始了～"
+    },
+    {
+      "hour": "8-11",
+      "text": "上午好！工作顺利嘛，不要久坐，多起来走动走动哦！"
+    },
+    {
+      "hour": "12-13",
+      "text": "中午了，工作了一个上午，现在是午餐时间！"
+    },
+    {
+      "hour": "14-17",
+      "text": "午后很容易犯困呢，今天的运动目标完成了吗？"
+    },
+    {
+      "hour": "18-19",
+      "text": "傍晚了！窗外夕阳的景色很美丽呢，最美不过夕阳红～"
+    },
+    {
+      "hour": "20-21",
+      "text": "晚上好，今天过得怎么样？"
+    },
+    {
+      "hour": "22-23",
+      "text": [
+        "已经这么晚了呀，早点休息吧，晚安～",
+        "深夜时要爱护眼睛呀！"
+      ]
+    },
+    {
+      "hour": "0-5",
+      "text": "你是夜猫子呀？这么晚还不睡觉，明天起的来嘛？"
+    }
+  ],
+  "message": {
+    "default": [
+      "好久不见，日子过得好快呢……",
+      "嗨～快来逗我玩吧！",
+      "记得把小站加入收藏夹哦！",
+      "今天也要好好学习呀！"
+    ],
+    "console": "哈哈，你打开了控制台，是想要看看我的小秘密吗？",
+    "copy": "你复制了些什么呀，转载要记得注明出处哦！",
+    "visibilitychange": "哇，你终于回来了～",
+    "changeSuccess": "我的新衣服好看嘛？",
+    "changeFail": "我还没有其他衣服呢！",
+    "photo": "照好了嘛，是不是很可爱呢？",
+    "goodbye": "愿你有一天能与重要的人重逢。",
+    "hitokoto": "这句一言来自 <span>「$1」</span>，是 <span>$2</span> 在 hitokoto.cn 投稿的。",
+    "welcome": "欢迎阅读<span>「$1」</span>",
+    "referrer": "Hello！来自 <span>$1</span> 的朋友",
+    "hoverBody": [
+      "干嘛呢你～",
+      "喵喵喵？",
+      "要和我玩吗？",
+      "我在这里哦～"
+    ],
+    "tapBody": [
+      "是…是不小心碰到了吧…",
+      "不要戳我啦！",
+      "嘿嘿，好痒～",
+      "有什么事吗？"
+    ]
+  },
+  "models": [
+    {
+      "name": "Potion-Maker/Pio",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/Potion-Maker/Pio/index.json"
+      ],
+      "message": "来自 Potion Maker 的 Pio 酱 ~"
+    },
+    {
+      "name": "Potion-Maker/Tia",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/Potion-Maker/Tia/index.json"
+      ],
+      "message": "来自 Potion Maker 的 Tia 酱 ~"
+    },
+    {
+      "name": "HyperdimensionNeptunia",
+      "paths": [
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/neptune_classic/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/nepnep/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/nepmaid/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/noir_classic/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/blanc_classic/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/vert_classic/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/nepgear/index.json",
+        "https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/model/HyperdimensionNeptunia/histoire/index.json"
+      ],
+      "message": "Nep! Nep! 超次元游戏：海王星 系列"
+    }
+  ]
+}

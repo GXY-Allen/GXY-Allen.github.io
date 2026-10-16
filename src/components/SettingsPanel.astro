@@ -1,0 +1,92 @@
+---
+import { SITE } from '../site.config';
+import Icon from './Icon.astro';
+
+const bgs = SITE.backgrounds;
+const thumbStyle = (b: (typeof bgs)[number]) =>
+  b.type === 'image' ? `background-image:url(${b.thumb ?? b.value})` : `background:${b.thumb ?? b.value}`;
+---
+<div class="overlay" data-overlay="settings" hidden></div>
+<aside class="settings-panel" id="settings-panel" role="dialog" aria-label="外观设置" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="drawer-title"><Icon name="palette" size={18} /> 外观设置</span>
+    <button class="icon-btn" data-close aria-label="关闭设置"><Icon name="x" size={20} /></button>
+  </div>
+  <div class="settings-body">
+    <div class="set-group">
+      <div class="set-label">显示模式</div>
+      <div class="segmented" data-setting="mode">
+        <button data-value="light"><Icon name="sun" size={16} /> 浅色</button>
+        <button data-value="dark"><Icon name="moon" size={16} /> 深色</button>
+        <button data-value="auto"><Icon name="monitor" size={16} /> 跟随系统</button>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <div class="set-label">主题色</div>
+      <div class="swatches" data-setting="primary">
+        {SITE.appearance.primaryPresets.map((c) => <button class="swatch" data-value={c} style={`--c:${c}`} aria-label={`主题色 ${c}`} />)}
+        <label class="swatch swatch-custom" title="自定义颜色">
+          <input type="color" data-custom-color aria-label="自定义主题色" />
+          <Icon name="wand" size={15} />
+        </label>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <div class="set-label">背景</div>
+      <div class="bg-options" data-setting="bg">
+        {
+          bgs.map((b) => (
+            <button class="bg-option" data-value={b.id} title={b.name}>
+              <span class="bg-thumb" style={thumbStyle(b)} />
+              <span class="bg-name">{b.name}</span>
+            </button>
+          ))
+        }
+        <label class="bg-option bg-upload" data-value="upload" title="使用本地图片（只保存在你的浏览器中）">
+          <span class="bg-thumb"><Icon name="upload" size={18} /></span>
+          <span class="bg-name">本地图片</span>
+          <input type="file" accept="image/*" data-bg-file hidden />
+        </label>
+      </div>
+      <div class="bg-url">
+        <input type="url" placeholder="或粘贴图片链接，回车应用" data-bg-url aria-label="背景图片链接" />
+        <button class="btn sm" data-bg-url-apply>应用</button>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <div class="set-label">背景模糊 <output data-out="bgBlur"></output></div>
+      <input type="range" min="0" max="24" step="1" data-setting="bgBlur" aria-label="背景模糊" />
+    </div>
+
+    <div class="set-group">
+      <div class="set-label">卡片透明度 <output data-out="cardOpacity"></output></div>
+      <input type="range" min="0.35" max="1" step="0.01" data-setting="cardOpacity" aria-label="卡片透明度" />
+    </div>
+
+    <div class="set-group">
+      <div class="set-label">正文字号 <output data-out="fontSize"></output></div>
+      <input type="range" min="14" max="22" step="1" data-setting="fontSize" aria-label="正文字号" />
+    </div>
+
+    <div class="set-group">
+      <label class="switch-row">
+        <span><Icon name="sparkles" size={16} /> 动画特效</span>
+        <input type="checkbox" class="switch" data-setting="motion" />
+      </label>
+      {
+        SITE.features.live2d.enable && (
+          <label class="switch-row">
+            <span><Icon name="user" size={16} /> 看板娘（宽屏电脑）</span>
+            <input type="checkbox" class="switch" data-setting="live2d" />
+          </label>
+        )
+      }
+    </div>
+
+    <button class="btn block ghost" data-settings-reset><Icon name="reset" size={16} /> 恢复默认</button>
+    <p class="settings-note">设置只保存在当前浏览器中。站点默认值在 <code>src/site.config.ts</code> 中修改。</p>
+  </div>
+</aside>

@@ -1,0 +1,43 @@
+---
+import { SITE } from '../site.config';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' || /^\/page\/\d+\/?$/.test(path) || path.startsWith('/posts/') : path.startsWith(href.replace(/\/$/, ''));
+---
+<header class="topbar" id="topbar" transition:name="topbar" transition:animate="none">
+  <div class="topbar-inner glass">
+    <button class="icon-btn menu-btn" data-open="drawer" aria-label="打开菜单">
+      <Icon name="menu" size={20} />
+    </button>
+    <a class="brand" href="/" aria-label="回到首页">
+      <img class="brand-avatar" src={SITE.author.avatar} alt="" width="30" height="30" />
+      <span class="brand-title">{SITE.title}</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      {
+        SITE.nav.map((item) => (
+          <a href={item.href} class:list={['nav-link', { active: isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>
+            <Icon name={item.icon} size={16} />
+            <span>{item.name}</span>
+          </a>
+        ))
+      }
+      <span class="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn search-trigger" data-open="search" aria-label="搜索" title="搜索 (Ctrl + K)">
+        <Icon name="search" size={19} />
+        <kbd class="kbd-hint">Ctrl K</kbd>
+      </button>
+      <button class="icon-btn theme-toggle" data-action="toggle-theme" aria-label="切换明暗主题" title="切换明暗主题">
+        <span class="theme-icon sun"><Icon name="sun" size={19} /></span>
+        <span class="theme-icon moon"><Icon name="moon" size={19} /></span>
+      </button>
+      <button class="icon-btn" data-open="settings" aria-label="外观设置" title="外观设置">
+        <Icon name="palette" size={19} />
+      </button>
+    </div>
+  </div>
+</header>

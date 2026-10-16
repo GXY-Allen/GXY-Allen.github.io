@@ -1,0 +1,31 @@
+---
+import { getPosts, formatDate } from '../utils/posts';
+import Icon from './Icon.astro';
+import Cover from './Cover.astro';
+
+const posts = (await getPosts()).slice(0, 5);
+---
+{
+  posts.length > 0 && (
+    <section class="widget glass" data-reveal>
+      <div class="widget-head">
+        <h2 class="widget-title"><Icon name="history" size={17} /> 最近文章</h2>
+      </div>
+      <ul class="recent-list">
+        {posts.map((p) => (
+          <li>
+            <a href={p.url} class="recent-item" data-ripple>
+              <span class="recent-thumb">
+                {p.cover ? <Cover src={p.cover} alt="" width={96} /> : <span class="recent-thumb-ph">{p.title.slice(0, 1)}</span>}
+              </span>
+              <span class="recent-text">
+                <span class="recent-title">{p.title}</span>
+                <time datetime={p.date.toISOString()}>{formatDate(p.date)}</time>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

@@ -1,0 +1,95 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import Toc from '../../components/Toc.astro';
+import Cover from '../../components/Cover.astro';
+import SeriesCard from '../../components/SeriesCard.astro';
+import PrevNext from '../../components/PrevNext.astro';
+import CompactList from '../../components/CompactList.astro';
+import { SITE } from '../../site.config';
+import { getPosts, getAdjacent, getRelated, formatDate, formatWords, type Post } from '../../utils/posts';
+import { categoryUrl, tagUrl } from '../../utils/paths';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const { Content, headings } = await render(post.entry);
+const { newer, older } = await getAdjacent(post);
+const related = await getRelated(post, 4);
+const showUpdated = post.updated.getTime() - post.date.getTime() > 24 * 3600 * 1000;
+const explicitCover = post.entry.data.cover ? post.cover : undefined;
+const hasToc = headings.filter((h: { depth: number }) => h.depth >= 2 && h.depth <= 4 && (h as any).slug !== 'footnote-label').length > 0;
+const crumbs = post.category.map((name, i) => ({ name, href: categoryUrl(post.category.slice(0, i + 1)) }));
+const ogImage = typeof post.cover === 'string' ? post.cover : post.cover?.src;
+const hasMermaid = /^```mermaid/m.test(post.entry.body ?? '');
+---
+<BaseLayout
+  variant="post"
+  title={post.title}
+  description={post.description}
+  image={ogImage}
+  currentCategory={post.categoryKey}
+  hasToc={hasToc}
+  article={{ published: post.date, modified: post.updated, tags: post.tags }}
+>
+  <Toc slot="right-top" headings={headings} />
+  <div slot="overlay" class="toc-popover" id="toc-popover" aria-hidden="true">
+    <Toc headings={headings} variant="popover" />
+  </div>
+
+  <article class="post glass" data-pagefind-body data-mermaid={hasMermaid ? '' : undefined}>
+    {explicitCover && <div class="post-cover-hero"><Cover src={explicitCover} alt="" width={1200} eager /></div>}
+    <header class="post-header">
+      <nav class="breadcrumb" aria-label="面包屑" data-pagefind-ignore>
+        <a href="/"><Icon name="home" size={14} /> 首页</a>
+        {crumbs.map((c) => (<><Icon name="chevron-right" size={13} class="sep" /><a href={c.href}>{c.name}</a></>))}
+      </nav>
+      <h1 class="post-title" data-pagefind-meta="title">{post.title}</h1>
+      <div class="post-meta" data-pagefind-ignore>
+        <span title="发布时间"><Icon name="calendar" size={15} /><time datetime={post.date.toISOString()}>{formatDate(post.date)}</time></span>
+        {showUpdated && <span title="最后更新"><Icon name="history" size={15} />更新于 {formatDate(post.updated)}</span>}
+        <span><Icon name="pen" size={15} />{formatWords(post.words)} 字</span>
+        <span><Icon name="clock" size={15} />约 {post.minutes} 分钟</span>
+        {SITE.features.busuanzi && <span class="bsz-item"><Icon name="eye" size={15} /><span class="bsz" data-bsz="page_pv">…</span> 次阅读</span>}
+      </div>
+      {post.tags.length > 0 && (
+        <div class="post-tags" data-pagefind-ignore>
+          {post.tags.map((t) => <a class="chip" href={tagUrl(t)} data-ripple>#{t}</a>)}
+        </div>
+      )}
+    </header>
+
+    <div data-pagefind-ignore><SeriesCard post={post} /></div>
+
+    <div class="prose" id="article">
+      <Content />
+    </div>
+
+    <footer class="post-footer" data-pagefind-ignore>
+      <div class="post-end"><span>— 完 —</span></div>
+      <div class="post-share">
+        <span>本文作者：<a href="/about/">{SITE.author.name}</a></span>
+        <span>发布于 {formatDate(post.date)}{showUpdated && `，更新于 ${formatDate(post.updated)}`}</span>
+        <button class="btn sm ghost" data-copy-link><Icon name="link" size={15} /> 复制文章链接</button>
+      </div>
+    </footer>
+  </article>
+
+  <PrevNext newer={newer} older={older} />
+
+  {
+    related.length > 0 && (
+      <section class="glass related" data-reveal>
+        <h2 class="section-title"><Icon name="sparkles" size={18} /> 相关文章</h2>
+        <CompactList posts={related} />
+      </section>
+    )
+  }
+</BaseLayout>

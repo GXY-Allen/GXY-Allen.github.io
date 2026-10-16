@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Icon from '../../components/Icon.astro';
+import Cover from '../../components/Cover.astro';
+import { getCategoryTree, flattenCategories, postsUnder, formatDate } from '../../utils/posts';
+
+const tree = await getCategoryTree();
+const total = flattenCategories(tree).length;
+---
+<BaseLayout title="分类" description="所有文章分类">
+  <PageHeader title="分类" icon="folder" subtitle={`共 ${total} 个分类 · 在 src/content/posts 下新建文件夹就是新分类`} crumbs={[{ name: '分类' }]} />
+  <div class="cat-grid">
+    {
+      tree.map((n, i) => {
+        const latest = postsUnder(n)[0];
+        return (
+          <a href={n.url} class="cat-card glass" data-reveal data-tilt style={`--i:${i % 6}`}>
+            <div class="cat-card-cover">
+              {n.cover ? <Cover src={n.cover} alt="" width={600} /> : <div class="cat-card-ph" style={`--h:${(i * 47) % 360}`} />}
+              <span class="cat-card-icon">{n.icon ?? <Icon name="folder" size={26} />}</span>
+            </div>
+            <div class="cat-card-body">
+              <h2>{n.name} <span class="cat-count">{n.count}</span></h2>
+              {n.description && <p>{n.description}</p>}
+              {n.children.length > 0 && (
+                <div class="cat-card-children">
+                  {n.children.map((c) => <span class="chip sm">{c.icon} {c.name} · {c.count}</span>)}
+                </div>
+              )}
+              {latest && <div class="cat-card-latest"><Icon name="history" size={13} /> 最新：{latest.title} · {formatDate(latest.date)}</div>}
+            </div>
+          </a>
+        );
+      })
+    }
+  </div>
+</BaseLayout>

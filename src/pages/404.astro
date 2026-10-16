@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+---
+<BaseLayout title="页面不存在">
+  <section class="glass not-found" data-reveal>
+    <div class="nf-code">404</div>
+    <h1>这里什么都没有</h1>
+    <p>页面可能被移动或删除了，试试搜索？</p>
+    <div class="nf-actions">
+      <a class="btn" href="/" data-ripple><Icon name="home" size={16} /> 回到首页</a>
+      <button class="btn ghost" data-open="search" data-ripple><Icon name="search" size={16} /> 搜索文章</button>
+    </div>
+  </section>
+</BaseLayout>

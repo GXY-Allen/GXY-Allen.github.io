@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import Pagination from '../../components/Pagination.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { SITE } from '../../site.config';
+import { getHomePosts } from '../../utils/posts';
+
+export async function getStaticPaths() {
+  const all = await getHomePosts();
+  const total = Math.ceil(all.length / SITE.pageSize);
+  return Array.from({ length: Math.max(0, total - 1) }, (_, i) => ({ params: { page: String(i + 2) } }));
+}
+
+const page = Number(Astro.params.page);
+const all = await getHomePosts();
+const total = Math.ceil(all.length / SITE.pageSize);
+const posts = all.slice((page - 1) * SITE.pageSize, page * SITE.pageSize);
+---
+<BaseLayout variant="home" title={`第 ${page} 页`}>
+  <PageHeader title={`全部文章 · 第 ${page} 页`} icon="file" subtitle={`共 ${all.length} 篇文章`} />
+  <section id="post-list" class="section">
+    <PostList posts={posts} showPinned />
+  </section>
+  <Pagination current={page} total={total} />
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+import { SITE } from '../site.config';
+import { getStats } from '../utils/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+const stats = await getStats();
+---
+<section class:list={['widget glass profile', { compact }]} data-reveal>
+  {!compact && <div class="profile-banner" style={SITE.banner ? `background-image:url(${SITE.banner})` : undefined} />}
+  <a href="/about/" class="profile-avatar" aria-label="关于我">
+    <img src={SITE.author.avatar} alt={SITE.author.name} width="84" height="84" />
+  </a>
+  <div class="profile-name">{SITE.author.name}</div>
+  <p class="profile-bio">{SITE.author.bio}</p>
+  <div class="profile-stats">
+    <a href="/archives/"><b>{stats.posts}</b><span>文章</span></a>
+    <a href="/categories/"><b>{stats.categories}</b><span>分类</span></a>
+    <a href="/tags/"><b>{stats.tags}</b><span>标签</span></a>
+  </div>
+  <div class="profile-social">
+    {
+      SITE.social.map((s) => (
+        <a href={s.href} title={s.name} aria-label={s.name} target={s.href.startsWith('http') ? '_blank' : undefined} rel="noopener">
+          <Icon name={s.icon} size={18} />
+        </a>
+      ))
+    }
+  </div>
+</section>

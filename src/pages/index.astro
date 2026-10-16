@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PostList from '../components/PostList.astro';
+import Pagination from '../components/Pagination.astro';
+import { SITE } from '../site.config';
+import { getHomePosts } from '../utils/posts';
+
+const all = await getHomePosts();
+const total = Math.max(1, Math.ceil(all.length / SITE.pageSize));
+const posts = all.slice(0, SITE.pageSize);
+---
+<BaseLayout variant="home">
+  <Hero />
+  <section id="post-list" class="section">
+    <PostList posts={posts} showPinned />
+  </section>
+  <Pagination current={1} total={total} />
+</BaseLayout>

@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PostList from '../../components/PostList.astro';
+import { getCategoryTree, flattenCategories, postsUnder, type CategoryNode } from '../../utils/posts';
+import { slugSegment } from '../../utils/paths';
+
+export async function getStaticPaths() {
+  const all = flattenCategories(await getCategoryTree());
+  return all.map((node) => ({ params: { path: node.path.map(slugSegment).join('/') }, props: { node } }));
+}
+
+interface Props {
+  node: CategoryNode;
+}
+const { node } = Astro.props;
+const posts = postsUnder(node);
+const crumbs = [
+  { name: '分类', href: '/categories/' },
+  ...node.path.slice(0, -1).map((_, i) => ({ name: node.path[i], href: '/categories/' + node.path.slice(0, i + 1).map(slugSegment).join('/') + '/' })),
+  { name: node.name },
+];
+---
+<BaseLayout title={`分类：${node.name}`} description={node.description ?? `${node.name} 分类下的文章`} currentCategory={node.key}>
+  <PageHeader
+    title={node.name}
+    emoji={node.icon}
+    icon="folder-open"
+    cover={node.cover}
+    subtitle={node.description ?? `共 ${node.count} 篇文章`}
+    crumbs={crumbs}
+  >
+    {
+      node.children.length > 0 && (
+        <div class="sub-cats">
+          {node.children.map((c) => (
+            <a class="chip" href={c.url} data-ripple>{c.icon ?? '📁'} {c.name}<sup>{c.count}</sup></a>
+          ))}
+        </div>
+      )
+    }
+  </PageHeader>
+  <PostList posts={posts} />
+</BaseLayout>

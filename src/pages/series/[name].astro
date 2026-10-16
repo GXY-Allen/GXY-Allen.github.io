@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import CompactList from '../../components/CompactList.astro';
+import { getSeries, formatWords, type SeriesInfo } from '../../utils/posts';
+
+export async function getStaticPaths() {
+  return (await getSeries()).map((s) => ({ params: { name: s.slug }, props: { s } }));
+}
+interface Props {
+  s: SeriesInfo;
+}
+const { s } = Astro.props;
+---
+<BaseLayout title={`专栏：${s.name}`} description={`专栏「${s.name}」`}>
+  <PageHeader title={s.name} icon="book" subtitle={`共 ${s.posts.length} 篇 · ${formatWords(s.words)} 字`} crumbs={[{ name: '专栏', href: '/series/' }, { name: s.name }]} />
+  <section class="glass section-card" data-reveal>
+    <CompactList posts={s.posts} numbered showCategory={false} />
+  </section>
+</BaseLayout>

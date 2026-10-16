@@ -1,0 +1,8 @@
+---
+import Icon from './Icon.astro';
+---
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="图片预览">
+  <img class="lightbox-img" alt="" />
+  <div class="lightbox-caption"></div>
+  <button class="icon-btn lightbox-close" aria-label="关闭预览"><Icon name="x" size={22} /></button>
+</div>

@@ -1,0 +1,28 @@
+---
+import type { Post } from '../utils/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+  newer?: Post;
+  older?: Post;
+}
+const { newer, older } = Astro.props;
+---
+{
+  (newer || older) && (
+    <nav class="prev-next" aria-label="上下篇">
+      {older ? (
+        <a class="pn-card glass prev" href={older.url} data-ripple>
+          <span class="pn-label"><Icon name="arrow-left" size={14} /> 上一篇</span>
+          <span class="pn-title">{older.title}</span>
+        </a>
+      ) : <span />}
+      {newer ? (
+        <a class="pn-card glass next" href={newer.url} data-ripple>
+          <span class="pn-label">下一篇 <Icon name="arrow-right" size={14} /></span>
+          <span class="pn-title">{newer.title}</span>
+        </a>
+      ) : <span />}
+    </nav>
+  )
+}

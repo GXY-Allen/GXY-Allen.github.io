@@ -1,0 +1,33 @@
+---
+import type { Post } from '../utils/posts';
+import { getSeries } from '../utils/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const series = (await getSeries()).find((s) => s.name === post.series);
+const idx = series ? series.posts.findIndex((p) => p.id === post.id) : -1;
+---
+{
+  series && (
+    <aside class="series-card" data-reveal>
+      <div class="series-head">
+        <a href={series.url} class="series-name"><Icon name="layers" size={17} /> 专栏 · {series.name}</a>
+        <span class="series-progress-text">第 {idx + 1} / {series.posts.length} 篇</span>
+      </div>
+      <div class="series-bar"><i style={`width:${((idx + 1) / series.posts.length) * 100}%`} /></div>
+      <details class="series-details" open={series.posts.length <= 6}>
+        <summary>查看专栏目录</summary>
+        <ol class="series-list">
+          {series.posts.map((p, i) => (
+            <li class:list={{ current: p.id === post.id, done: i < idx }}>
+              <a href={p.url}><span class="series-no">{i + 1}</span>{p.title}</a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </aside>
+  )
+}

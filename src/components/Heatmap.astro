@@ -1,0 +1,14 @@
+---
+import Icon from './Icon.astro';
+---
+<section class="widget glass heatmap" data-reveal>
+  <div class="widget-head">
+    <h2 class="widget-title"><Icon name="flame" size={17} /> 写作热力图</h2>
+  </div>
+  <div class="hm-months" aria-hidden="true"></div>
+  <div class="hm-grid" role="img" aria-label="发文热力图"></div>
+  <div class="hm-foot">
+    <span class="hm-summary"></span>
+    <span class="hm-legend" aria-hidden="true">少<i data-l="0"></i><i data-l="1"></i><i data-l="2"></i><i data-l="3"></i><i data-l="4"></i>多</span>
+  </div>
+</section>

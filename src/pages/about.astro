@@ -1,0 +1,18 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { SITE } from '../site.config';
+
+const entry = await getEntry('pages', 'about');
+const rendered = entry ? await render(entry) : null;
+const Content = rendered?.Content;
+---
+<BaseLayout title="关于" description={`关于 ${SITE.author.name}`}>
+  <PageHeader title={entry?.data.title ?? '关于我'} icon="user" crumbs={[{ name: '关于' }]} />
+  <article class="post glass">
+    <div class="prose">
+      {Content ? <Content /> : <p>在 <code>src/content/pages/about.md</code> 里写点什么吧～</p>}
+    </div>
+  </article>
+</BaseLayout>

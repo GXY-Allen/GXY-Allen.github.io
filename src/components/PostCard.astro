@@ -1,0 +1,45 @@
+---
+import type { Post } from '../utils/posts';
+import { formatDate, formatWords } from '../utils/posts';
+import { categoryUrl } from '../utils/paths';
+import Icon from './Icon.astro';
+import Cover from './Cover.astro';
+
+interface Props {
+  post: Post;
+  index?: number;
+  showPinned?: boolean;
+}
+const { post, index = 0, showPinned = false } = Astro.props;
+const flip = index % 2 === 1;
+---
+<article class:list={['post-card glass', { 'has-cover': !!post.cover, flip }]} data-reveal data-tilt style={`--i:${index % 6}`}>
+  {
+    post.cover && (
+      <a href={post.url} class="post-cover" tabindex="-1" aria-hidden="true">
+        <Cover src={post.cover} alt="" width={640} eager={index < 2} />
+      </a>
+    )
+  }
+  <div class="post-card-body">
+    <div class="post-card-top">
+      {showPinned && post.pinned && <span class="badge pinned"><Icon name="pin" size={13} /> 置顶</span>}
+      <a class="badge cat" href={categoryUrl(post.category)}><Icon name="folder" size={13} /> {post.category.join(' / ')}</a>
+      {post.series && <span class="badge series"><Icon name="layers" size={13} /> {post.series}</span>}
+      {post.draft && <span class="badge draft">草稿</span>}
+    </div>
+    <h2 class="post-card-title"><a href={post.url}>{post.title}</a></h2>
+    <p class="post-card-excerpt">{post.description}</p>
+    <div class="post-card-meta">
+      <span><Icon name="calendar" size={14} /><time datetime={post.date.toISOString()}>{formatDate(post.date)}</time></span>
+      <span><Icon name="pen" size={14} />{formatWords(post.words)} 字</span>
+      <span><Icon name="clock" size={14} />{post.minutes} 分钟</span>
+      {post.tags.length > 0 && (
+        <span class="post-card-tags">
+          {post.tags.slice(0, 3).map((t) => <em>#{t}</em>)}
+        </span>
+      )}
+    </div>
+  </div>
+  <a href={post.url} class="post-card-link" aria-label={`阅读：${post.title}`}></a>
+</article>

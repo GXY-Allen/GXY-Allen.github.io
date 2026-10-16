@@ -1,0 +1,40 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  current: number;
+  total: number;
+  /** 第 n 页的地址 */
+  base?: string;
+}
+const { current, total, base = '' } = Astro.props;
+const href = (n: number) => (n === 1 ? `${base}/` : `${base}/page/${n}/`);
+const pages: (number | '…')[] = [];
+for (let n = 1; n <= total; n++) {
+  if (n === 1 || n === total || Math.abs(n - current) <= 1) pages.push(n);
+  else if (pages[pages.length - 1] !== '…') pages.push('…');
+}
+---
+{
+  total > 1 && (
+    <nav class="pagination" aria-label="分页">
+      {current > 1 ? (
+        <a class="page-btn glass" href={href(current - 1)} aria-label="上一页" data-ripple><Icon name="chevron-left" size={18} /></a>
+      ) : (
+        <span class="page-btn glass disabled"><Icon name="chevron-left" size={18} /></span>
+      )}
+      {pages.map((p) =>
+        p === '…' ? (
+          <span class="page-gap">…</span>
+        ) : (
+          <a class:list={['page-btn glass', { active: p === current }]} href={href(p)} aria-current={p === current ? 'page' : undefined} data-ripple>{p}</a>
+        ),
+      )}
+      {current < total ? (
+        <a class="page-btn glass" href={href(current + 1)} aria-label="下一页" data-ripple><Icon name="chevron-right" size={18} /></a>
+      ) : (
+        <span class="page-btn glass disabled"><Icon name="chevron-right" size={18} /></span>
+      )}
+    </nav>
+  )
+}
