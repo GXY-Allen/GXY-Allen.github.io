@@ -1,6 +1,6 @@
 /** 侧栏组件：分类树折叠、日历、热力图、运行天数 */
 import { navigate } from 'astro:transitions/client';
-import { $, $$, activity, rafThrottle, ymd, type DayActivity } from './util';
+import { $, $$, activity, ymd, type DayActivity } from './util';
 
 /* ---------------- 分类树 ---------------- */
 const CAT_KEY = 'blog-cat-open';
@@ -213,61 +213,6 @@ function initSince() {
   }
 }
 
-/* ---------------- 侧栏上下边缘渐隐 ---------------- */
-// 侧栏内容超出时，滚动区域的上下边缘做渐隐，而不是生硬截断。
-// 遮罩加在每张卡片上（加在整个侧栏上会让卡片的毛玻璃模糊失效），按卡片在可视区的位置计算。
-const wide = window.matchMedia('(min-width: 1280px)');
-const FADE = 48; // 渐隐区高度（px）
-const EXT = 48; // 遮罩向卡片上下多延伸的距离，避免阴影被切掉（与 CSS 中 --fe 一致）
-let fadeRO: ResizeObserver | null = null;
-
-function fadeEdges(side: HTMLElement) {
-  const cards = Array.from(side.querySelectorAll<HTMLElement>(':scope > .side-inner > *'));
-  if (!wide.matches) {
-    for (const c of cards) c.classList.remove('edge-fade');
-    return;
-  }
-  // 读：先读出所有位置（offsetTop 不受悬停/动画的 transform 影响，遮罩不会抖动）
-  const top = side.scrollTop;
-  const h = side.clientHeight;
-  const max = side.scrollHeight - h;
-  // 已经滚到顶/底时不渐隐；离边缘越近渐隐越浅，过渡自然
-  const ft = Math.min(FADE, Math.max(0, top));
-  const fb = Math.min(FADE, Math.max(0, max - top));
-  const pos = cards.map((c) => [c.offsetTop - top, c.offsetHeight]);
-  // 写
-  cards.forEach((c, i) => {
-    const [y, ch] = pos[i];
-    // 只处理可见且碰到渐隐区的卡片（完全滚出去的不用加遮罩）
-    const hit = y < h && y + ch > 0 && ((ft > 0 && y < ft) || (fb > 0 && y + ch > h - fb));
-    c.classList.toggle('edge-fade', hit);
-    if (!hit) return;
-    const o = EXT - y;
-    c.style.setProperty('--f0', `${o}px`);
-    c.style.setProperty('--f1', `${o + ft}px`);
-    c.style.setProperty('--f2', `${o + h - fb}px`);
-    c.style.setProperty('--f3', `${o + h}px`);
-  });
-}
-
-function initEdgeFade() {
-  // 侧栏高度或内容变化（窗口缩放、展开分类、切换月份等）时重新计算
-  fadeRO?.disconnect();
-  fadeRO =
-    'ResizeObserver' in window
-      ? new ResizeObserver((es) => new Set(es.map((e) => e.target.closest<HTMLElement>('.side'))).forEach((s) => s && fadeEdges(s)))
-      : null;
-  for (const side of $$<HTMLElement>('.side')) {
-    const run = rafThrottle(() => fadeEdges(side));
-    side.addEventListener('scroll', run, { passive: true });
-    fadeRO?.observe(side);
-    const inner = $('.side-inner', side);
-    if (inner) fadeRO?.observe(inner);
-    fadeEdges(side);
-  }
-}
-wide.addEventListener('change', () => $$<HTMLElement>('.side').forEach(fadeEdges));
-
 export function initSidebar() {
   initCategoryTree();
   const now = new Date();
@@ -278,7 +223,6 @@ export function initSidebar() {
   renderCalendar();
   renderHeatmap();
   initSince();
-  initEdgeFade();
   hideTip();
 }
 
