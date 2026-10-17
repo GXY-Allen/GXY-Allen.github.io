@@ -241,6 +241,16 @@
   .side::-webkit-scrollbar {
     display: none;
   }
+  /* 侧栏滚动区域上下边缘渐隐（位置由 sidebar.ts 计算）。遮罩比卡片上下各多出 --fe，
+     并横向重复、不裁剪到卡片边框，卡片阴影不会被切掉 */
+  .side .edge-fade {
+    --fe: 48px;
+    --edge-mask: linear-gradient(to bottom, transparent var(--f0), #000 var(--f1), #000 var(--f2), transparent var(--f3));
+    -webkit-mask: var(--edge-mask) 0 calc(-1 * var(--fe)) / 100% calc(100% + 2 * var(--fe)) repeat-x;
+    mask: var(--edge-mask) 0 calc(-1 * var(--fe)) / 100% calc(100% + 2 * var(--fe)) repeat-x;
+    -webkit-mask-clip: no-clip;
+    mask-clip: no-clip;
+  }
   .side-right .toc {
     display: flex;
   }
