@@ -56,6 +56,12 @@ export default function rehypeBlog() {
         return SKIP;
       }
 
+      if (node.tagName === 'p') {
+        const kids = node.children.filter((c) => !(c.type === 'text' && !c.value.trim()));
+        if (kids.length && kids.every((c) => c.type === 'element' && c.tagName === 'img')) {
+          node.properties.className = [...(node.properties.className ?? []), 'img-p'];
+        }
+      }
       if (node.tagName === 'a' && typeof node.properties?.href === 'string') {
         if (/^https?:\/\//.test(node.properties.href)) {
           node.properties.target = '_blank';

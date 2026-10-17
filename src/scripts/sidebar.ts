@@ -137,8 +137,9 @@ function renderHeatmapIn(box: HTMLElement) {
   if (!grid || !months) return;
   const width = grid.clientWidth || box.clientWidth - 32;
   if (width <= 0) return;
-  const CELL = 11;
-  const GAP = 3;
+  const scale = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
+  const CELL = 11 * scale;
+  const GAP = 3 * scale;
   const weeks = Math.max(12, Math.min(53, Math.floor((width + GAP) / (CELL + GAP))));
   grid.style.gridTemplateColumns = `repeat(${weeks}, 1fr)`;
   const act = activity();

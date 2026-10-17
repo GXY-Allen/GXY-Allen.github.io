@@ -1,9 +1,14 @@
 /* ============ 文章正文排版 ============ */
+/* 正文行宽：在 .prose 上按正文字号算出一次，子元素（包括字号更大的标题）共用同一个宽度 */
+@property --measure {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 736px; /* 只是兜底值；@property 的初始值不能用 rem/em */
+}
 .prose {
-  --prose-pad: clamp(18px, 4vw, 52px);
-  max-width: calc(46em + var(--prose-pad) * 2);
+  --prose-pad: var(--post-pad, clamp(1.125rem, 4vw, 3.25rem));
   margin: 0 auto;
-  padding: 12px var(--prose-pad) 8px;
+  padding: 0.75rem var(--prose-pad) 0.5rem;
   font-size: var(--article-size);
   line-height: 1.85;
   color: var(--text);
@@ -19,6 +24,18 @@
 .prose > :first-child {
   margin-top: 0;
 }
+/* 文字保持舒适的行宽；图片、代码、表格、流程图在宽屏上可以更宽，充分利用空间 */
+.prose > * {
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+}
+.prose > :is(.code-block, .table-wrap, .mermaid-block, .img-p, .katex-display) {
+  max-width: min(100%, calc(var(--measure) * 1.56));
+}
+.prose > p.img-p {
+  text-align: center;
+}
 .prose p,
 .prose ul,
 .prose ol,
@@ -26,7 +43,7 @@
 .prose pre,
 .prose table,
 .prose figure {
-  margin: 1.05em 0;
+  margin-block: 1.05em;
 }
 .prose h2,
 .prose h3,
@@ -34,10 +51,10 @@
 .prose h5,
 .prose h6 {
   position: relative;
-  margin: 1.9em 0 0.7em;
+  margin-block: 1.9em 0.7em;
   font-weight: 700;
   line-height: 1.4;
-  scroll-margin-top: calc(var(--topbar-h) + 24px);
+  scroll-margin-top: calc(var(--topbar-h) + 1.5rem);
 }
 .prose h2 {
   font-size: 1.5em;
@@ -47,11 +64,11 @@
 .prose h2::before {
   content: '';
   position: absolute;
-  left: calc(-1 * min(var(--prose-pad) - 6px, 22px));
+  left: calc(-1 * min(var(--prose-pad) - 0.375rem, 1.375rem));
   top: 0.32em;
-  width: 4px;
+  width: 0.25rem;
   height: 1.05em;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 40%, #f093fb));
 }
 .prose h3 {
@@ -89,28 +106,28 @@
 .prose a:hover {
   background-image: linear-gradient(var(--primary-soft), var(--primary-soft));
   background-size: 100% 100%;
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 .prose strong {
   font-weight: 700;
   color: color-mix(in srgb, var(--text) 85%, var(--primary));
 }
 .prose mark {
-  padding: 0 3px;
-  border-radius: 4px;
+  padding: 0 0.1875rem;
+  border-radius: 0.25rem;
   color: inherit;
   background: linear-gradient(transparent 40%, color-mix(in srgb, #ffd43b 55%, transparent) 40%);
 }
 .prose u {
   text-decoration-color: var(--primary);
   text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+  text-underline-offset: 0.1875rem;
 }
 .prose del {
   color: var(--text-3);
 }
 .prose hr {
-  margin: 2.2em 0;
+  margin-block: 2.2em;
   border: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
@@ -142,7 +159,7 @@
   height: 1.05em;
   margin: 0 0.45em 0 0;
   vertical-align: -0.15em;
-  border-radius: 5px;
+  border-radius: 0.3125rem;
   border: 2px solid var(--line-strong);
   background: var(--card-solid);
 }
@@ -157,8 +174,8 @@
 .prose blockquote {
   position: relative;
   padding: 0.7em 1.1em;
-  border-left: 4px solid color-mix(in srgb, var(--primary) 55%, transparent);
-  border-radius: 0 12px 12px 0;
+  border-left: 0.25rem solid color-mix(in srgb, var(--primary) 55%, transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
   background: var(--primary-softer);
   color: var(--text-2);
 }
@@ -201,7 +218,7 @@
   max-width: 100%;
   height: auto;
   margin: 0.6em auto;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   box-shadow: var(--shadow);
   cursor: zoom-in;
   object-fit: contain;
@@ -225,9 +242,9 @@
 }
 .img-missing {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 0.375rem 0.75rem;
   border: 1px dashed #e03131;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: #e03131;
   font-size: 0.85em;
 }
@@ -236,7 +253,7 @@
 .prose :not(pre) > code {
   padding: 0.15em 0.42em;
   margin: 0 0.1em;
-  border-radius: 6px;
+  border-radius: 0.375rem;
   font-family: var(--font-mono);
   font-size: 0.86em;
   color: color-mix(in srgb, var(--primary) 70%, #c2255c);
@@ -249,8 +266,8 @@
 /* 代码块 */
 .code-block {
   position: relative;
-  margin: 1.2em 0;
-  border-radius: 14px;
+  margin-block: 1.2em;
+  border-radius: 0.875rem;
   overflow: hidden;
   background: var(--code-bg);
   border: 1px solid var(--line);
@@ -260,23 +277,23 @@
 .code-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 8px 0 14px;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding: 0 0.5rem 0 0.875rem;
   border-bottom: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-3);
   user-select: none;
 }
 .code-dots {
   display: flex;
-  gap: 6px;
-  margin-right: 4px;
+  gap: 0.375rem;
+  margin-right: 0.25rem;
 }
 .code-dots i {
-  width: 11px;
-  height: 11px;
+  width: 0.6875rem;
+  height: 0.6875rem;
   border-radius: 50%;
   background: #ff5f57;
 }
@@ -295,12 +312,12 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 9px;
-  border-radius: 7px;
+  gap: 0.25rem;
+  height: 1.625rem;
+  padding: 0 0.5625rem;
+  border-radius: 0.4375rem;
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-3);
   transition:
     background 0.2s,
@@ -315,7 +332,7 @@
 }
 .prose pre {
   margin: 0;
-  padding: 14px 0;
+  padding: 0.875rem 0;
   overflow-x: auto;
   font-family: var(--font-mono);
   line-height: 1.65;
@@ -325,7 +342,7 @@
 .prose pre code {
   display: block;
   min-width: max-content;
-  padding: 0 18px;
+  padding: 0 1.125rem;
   font-family: inherit;
   font-size: inherit;
   counter-reset: line;
@@ -347,7 +364,7 @@
   min-width: 100%;
 }
 .code-block.collapsible.collapsed pre {
-  max-height: 420px;
+  max-height: 26.25rem;
   overflow-y: hidden;
 }
 .code-expand {
@@ -359,16 +376,16 @@
   justify-content: center;
   align-items: flex-end;
   width: 100%;
-  height: 34px;
-  font-size: 12.5px;
+  height: 2.125rem;
+  font-size: 0.7812rem;
   color: var(--primary-text);
   border-top: 1px solid var(--line);
   transition: background 0.2s;
 }
 .code-block.collapsible.collapsed .code-expand {
-  margin-top: -70px;
-  height: 70px;
-  padding-bottom: 8px;
+  margin-top: -4.375rem;
+  height: 4.375rem;
+  padding-bottom: 0.5rem;
   border-top: 0;
   background: linear-gradient(transparent, var(--code-bg) 75%);
 }
@@ -378,9 +395,9 @@
 
 /* Mermaid */
 .mermaid-block {
-  margin: 1.2em 0;
-  padding: 16px;
-  border-radius: 14px;
+  margin-block: 1.2em;
+  padding: 1rem;
+  border-radius: 0.875rem;
   background: rgb(var(--surface) / 0.55);
   border: 1px solid var(--line);
   overflow-x: auto;
@@ -402,9 +419,9 @@
 
 /* 表格 */
 .table-wrap {
-  margin: 1.2em 0;
+  margin-block: 1.2em;
   overflow-x: auto;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   border: 1px solid var(--line);
 }
 .prose table {
@@ -443,7 +460,7 @@
   font-size: 1.08em;
 }
 .prose .katex-display {
-  margin: 1.2em 0;
+  margin-block: 1.2em;
   padding: 0.4em 0;
   overflow-x: auto;
   overflow-y: hidden;

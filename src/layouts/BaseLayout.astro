@@ -140,7 +140,7 @@ const pageAnim = {
           st.setProperty('--bg-blur', (+s.bgBlur || 0) + 'px');
           root.dataset.blur = +s.bgBlur > 0 ? 'on' : 'off';
           st.setProperty('--card-alpha', String(s.cardOpacity));
-          st.setProperty('--article-size', s.fontSize + 'px');
+          st.setProperty('--article-size', s.fontSize / 16 + 'rem');
           var meta = document.querySelector('meta[name="theme-color"]');
           if (meta) meta.setAttribute('content', dark ? '#12141c' : s.primary);
         }
