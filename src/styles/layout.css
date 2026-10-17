@@ -263,6 +263,21 @@
     grid-template-columns: 280px minmax(0, 1fr) 300px;
   }
 }
+/* 超宽屏（如 2560×1440 缩放 125%）：页面随窗口变宽，两侧不再大片留白；正文行宽仍由 .prose 限制 */
+@media (min-width: 1800px) {
+  :root {
+    --max-w: min(94vw, 1920px);
+  }
+  .layout {
+    grid-template-columns: minmax(280px, 310px) minmax(0, 1fr) minmax(300px, 330px);
+  }
+}
+/* 三栏时：中间内容比侧栏短（如归档、分类页），最后一张卡片延伸到与侧栏底部对齐，不留空白 */
+@media (min-width: 1280px) {
+  .main > .glass:last-child {
+    flex-grow: 1;
+  }
+}
 
 /* ============ 页脚 ============ */
 .site-footer {

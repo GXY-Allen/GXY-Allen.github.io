@@ -1988,3 +1988,18 @@ input[type='range']::-moz-range-thumb {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* 列表末尾：内容短时向下延伸填满，并逐渐淡出，不会变成一大块空卡片 */
+.list-end {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 52px;
+  padding-top: 16px;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-3);
+  box-shadow: none;
+  -webkit-mask-image: linear-gradient(#000 0, #000 52px, transparent 100%);
+  mask-image: linear-gradient(#000 0, #000 52px, transparent 100%);
+}
