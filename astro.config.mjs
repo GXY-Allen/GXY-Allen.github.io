@@ -29,8 +29,12 @@ export default defineConfig({
     }),
   },
   image: {
-    // 允许优化 GitHub 图床里的远程图片尺寸推断
-    domains: [],
+    // 图床（GitHub 仓库）里的图片在构建时下载并转成 WebP、写好宽高，避免加载时页面跳动
+    domains: ['raw.githubusercontent.com'],
+    // 生成多种尺寸，手机只下载小图
+    layout: 'constrained',
+    responsiveStyles: false,
+    breakpoints: [480, 800, 1200, 1600],
   },
   vite: {
     build: { chunkSizeWarningLimit: 1500 },

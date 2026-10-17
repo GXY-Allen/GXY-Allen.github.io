@@ -10,11 +10,16 @@ interface Props {
   eager?: boolean;
 }
 const { src, alt = '', width = 720, class: cls, eager = false } = Astro.props;
+// 图床里的图片在构建时缩小并转成 WebP（与 astro.config.mjs 里的 image.domains 保持一致）
+const optimizable = typeof src === 'string' && /^https:\/\/raw\.githubusercontent\.com\//.test(src);
+const loading = eager ? 'eager' : 'lazy';
 ---
 {
-  typeof src === 'string' ? (
-    <img src={src} alt={alt} class={cls} loading={eager ? 'eager' : 'lazy'} decoding="async" referrerpolicy="no-referrer" />
+  typeof src !== 'string' ? (
+    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} loading={loading} />
+  ) : optimizable ? (
+    <Image src={src} alt={alt} class={cls} inferSize width={width} loading={loading} />
   ) : (
-    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} loading={eager ? 'eager' : 'lazy'} />
+    <img src={src} alt={alt} class={cls} loading={loading} decoding="async" referrerpolicy="no-referrer" />
   )
 }

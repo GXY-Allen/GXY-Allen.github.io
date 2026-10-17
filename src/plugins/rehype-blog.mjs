@@ -18,6 +18,7 @@ const COLLAPSE_LINES = 30;
 
 export default function rehypeBlog() {
   return (tree) => {
+    let firstImage = true;
     visit(tree, 'element', (node, index, parent) => {
       if (!parent || index == null) return;
 
@@ -62,8 +63,12 @@ export default function rehypeBlog() {
         }
       }
       if (node.tagName === 'img') {
-        node.properties.loading ??= 'lazy';
+        if (firstImage) {
+          node.properties.loading = 'eager';
+          node.properties.fetchpriority = 'high';
+        } else node.properties.loading ??= 'lazy';
         node.properties.decoding ??= 'async';
+        firstImage = false;
       }
       if (node.tagName === 'table') {
         parent.children[index] = el('div', { className: ['table-wrap'] }, [node]);

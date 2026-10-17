@@ -120,39 +120,29 @@
   }
 }
 
-/* 滚动显现：只有脚本运行后才隐藏，保证无 JS 时内容可见 */
-html.js[data-motion='on'] [data-reveal]:not(.revealed) {
+/* 滚动显现：只作用于首屏以下的元素（脚本加 .will-reveal），首屏内容直接显示，不拖慢首次渲染 */
+html[data-motion='on'] .will-reveal:not(.revealed) {
   opacity: 0;
   transform: translateY(24px);
 }
-html.js[data-motion='on'] [data-reveal] {
+html[data-motion='on'] .will-reveal {
   transition:
     opacity 0.7s var(--ease),
     transform 0.7s var(--ease),
     box-shadow 0.4s var(--ease);
   transition-delay: calc(var(--i, 0) * 60ms);
 }
-html.js[data-motion='on'] [data-reveal].revealed {
+html[data-motion='on'] .will-reveal.revealed {
   transition-delay: 0s;
 }
 /* 卡片有自己的 transform（3D 倾斜），显现结束后交还 */
-html.js[data-motion='on'] .post-card[data-reveal].revealed,
-html.js[data-motion='on'] .cat-card[data-reveal].revealed,
-html.js[data-motion='on'] .series-box[data-reveal].revealed {
+html[data-motion='on'] .post-card.will-reveal.revealed,
+html[data-motion='on'] .cat-card.will-reveal.revealed,
+html[data-motion='on'] .series-box.will-reveal.revealed {
   transition:
     opacity 0.7s var(--ease),
     transform 0.5s var(--ease),
     box-shadow 0.4s var(--ease);
-}
-
-html.js[data-motion='on'] .prose > .reveal-item:not(.revealed) {
-  opacity: 0;
-  transform: translateY(16px);
-}
-html.js[data-motion='on'] .prose > .reveal-item {
-  transition:
-    opacity 0.6s var(--ease),
-    transform 0.6s var(--ease);
 }
 
 /* 关闭动效 */

@@ -49,8 +49,9 @@ function initAnchors() {
 
 /* ---------------- 目录 ---------------- */
 let headings: HTMLElement[] = [];
+let lastActive: string | null = null;
 
-function updateToc() {
+function updateToc(force = false) {
   if (!headings.length) return;
   const offset = 110;
   let idx = -1;
@@ -59,6 +60,8 @@ function updateToc() {
     else break;
   }
   const activeId = idx >= 0 ? headings[idx].id : '';
+  if (!force && activeId === lastActive) return;
+  lastActive = activeId;
   for (const toc of $$('.toc')) {
     let found = false;
     for (const a of $$<HTMLAnchorElement>('a[data-slug]', toc)) {
@@ -77,15 +80,20 @@ function updateToc() {
   }
 }
 
+let lastPct = '';
 window.addEventListener('blog:scroll', ((e: CustomEvent<{ p: number }>) => {
+  if (!headings.length) return;
   updateToc();
   const pct = `${Math.round(e.detail.p * 100)}%`;
+  if (pct === lastPct) return;
+  lastPct = pct;
   $$('.toc-percent').forEach((el) => (el.textContent = pct));
 }) as EventListener);
 
 function initToc() {
   headings = $$<HTMLElement>('.prose :is(h2, h3, h4)[id]');
-  updateToc();
+  lastActive = null;
+  updateToc(true);
 }
 
 /* ---------------- 图片灯箱 ---------------- */

@@ -3,14 +3,10 @@ import { SITE } from '../site.config';
 import { getStats } from '../utils/posts';
 import Icon from './Icon.astro';
 
-interface Props {
-  compact?: boolean;
-}
-const { compact = false } = Astro.props;
 const stats = await getStats();
 ---
-<section class:list={['widget glass profile', { compact }]} data-reveal>
-  {!compact && <div class="profile-banner" style={SITE.banner ? `background-image:url(${SITE.banner})` : undefined} />}
+<section class="widget glass profile" data-reveal>
+  <div class="profile-banner" style={SITE.banner ? `background-image:url(${SITE.bannerThumb || SITE.banner})` : undefined}></div>
   <a href="/about/" class="profile-avatar" aria-label="关于我">
     <img src={SITE.author.avatar} alt={SITE.author.name} width="84" height="84" />
   </a>

@@ -1,19 +1,7 @@
 ---
 import { SITE } from '../site.config';
 import Icon from './Icon.astro';
-import ProfileCard from './ProfileCard.astro';
-import CategoryTree from './CategoryTree.astro';
-import TagCloud from './TagCloud.astro';
-import Notice from './Notice.astro';
-import Calendar from './Calendar.astro';
-import Heatmap from './Heatmap.astro';
-import RecentPosts from './RecentPosts.astro';
-import SiteStats from './SiteStats.astro';
 
-interface Props {
-  current?: string;
-}
-const { current } = Astro.props;
 const path = Astro.url.pathname;
 ---
 <div class="overlay" data-overlay="drawer" hidden></div>
@@ -23,7 +11,8 @@ const path = Astro.url.pathname;
     <button class="icon-btn" data-close aria-label="关闭菜单"><Icon name="x" size={20} /></button>
   </div>
   <div class="drawer-body">
-    <ProfileCard compact />
+    <!-- 手机端：侧栏的个人卡片会被脚本移到这里（不重复渲染，减少页面体积） -->
+    <div class="drawer-slot-top"></div>
     <nav class="drawer-nav widget glass">
       {
         SITE.nav.map((item) => (
@@ -35,13 +24,7 @@ const path = Astro.url.pathname;
         ))
       }
     </nav>
-    <CategoryTree current={current} />
-    <TagCloud limit={20} />
-    <!-- 手机端：原本在右栏的工具也都收进菜单里 -->
-    <Notice />
-    <Calendar />
-    {SITE.features.heatmap && <Heatmap />}
-    <RecentPosts />
-    <SiteStats />
+    <!-- 手机端：分类、标签、日历、热力图等工具会被移到这里 -->
+    <div class="drawer-slot"></div>
   </div>
 </aside>

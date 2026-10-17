@@ -131,7 +131,7 @@
 .prose ol > li::marker {
   font-weight: 600;
 }
-.prose li:has(> input[type='checkbox']) {
+.prose li.task-list-item {
   list-style: none;
   margin-left: -1.4em;
 }

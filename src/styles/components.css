@@ -20,9 +20,7 @@
     box-shadow 0.35s var(--ease),
     transform 0.35s var(--ease);
 }
-.widget:hover {
-  box-shadow: var(--shadow-lg);
-}
+/* 侧栏卡片悬停时保持不动，只有卡片里的条目有反馈 */
 .widget-head {
   display: flex;
   align-items: center;
@@ -106,12 +104,6 @@
 }
 .profile-avatar:hover img {
   transform: rotate(360deg);
-}
-.profile.compact {
-  padding-top: 16px;
-}
-.profile.compact .profile-avatar {
-  margin-top: 0;
 }
 .profile-name {
   margin-top: 6px;
@@ -289,7 +281,7 @@
   line-height: 1.75;
 }
 .notice .widget-title .icon {
-  animation: wiggle 2.6s ease-in-out infinite;
+  animation: wiggle 2.6s ease-in-out 3;
   transform-origin: 30% 60%;
 }
 
@@ -309,8 +301,7 @@
   flex: 1;
 }
 .search-box:hover {
-  box-shadow: var(--glow);
-  color: var(--text-2);
+  color: var(--primary-text);
 }
 
 /* 日历 */
@@ -595,6 +586,8 @@
 .hero {
   position: relative;
   overflow: hidden;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   min-height: clamp(200px, 24vw, 300px);
   display: flex;
   align-items: flex-end;
@@ -605,10 +598,16 @@
 .hero-bg {
   position: absolute;
   inset: -20px;
+  background-image: var(--hero-sm);
   background-size: cover;
   background-position: center 60%;
   transform: translate3d(0, var(--parallax, 0px), 0) scale(1.05);
   transition: transform 0.1s linear;
+}
+@media (min-width: 1100px) {
+  .hero-bg {
+    background-image: var(--hero-lg);
+  }
 }
 .hero-shade {
   position: absolute;
@@ -617,7 +616,7 @@
     linear-gradient(180deg, rgb(0 0 0 / 0) 30%, rgb(10 12 24 / 0.55) 100%),
     linear-gradient(120deg, color-mix(in srgb, var(--primary) 30%, transparent), transparent 60%);
 }
-.hero:not(:has(.hero-bg)) {
+.hero.hero-plain {
   background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 40%, #f093fb));
 }
 .hero-content {
@@ -671,7 +670,7 @@
   color: #fff;
   background: rgb(255 255 255 / 0.18);
   border: 1px solid rgb(255 255 255 / 0.3);
-  animation: bounce 2.2s ease-in-out infinite;
+  animation: bounce 2.2s ease-in-out 3;
   transition: background 0.2s;
 }
 .hero-down:hover {
@@ -1469,7 +1468,7 @@ a.page-btn:hover {
   gap: 6px;
   margin-top: 12px;
 }
-.post > [data-pagefind-ignore]:has(.series-card) {
+.post > .series-wrap {
   padding: 12px clamp(18px, 4vw, 52px) 0;
   max-width: calc(46em + 104px);
   margin: 0 auto;
@@ -1951,7 +1950,7 @@ input[type='range']::-moz-range-thumb {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: float 4s ease-in-out infinite;
+  animation: float 4s ease-in-out 3;
 }
 .not-found h1 {
   margin: 12px 0 4px;

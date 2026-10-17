@@ -213,8 +213,6 @@
   }
   .side-right {
     align-self: start;
-    position: sticky;
-    top: calc(52px + 10px + var(--gap));
   }
   .side-right .toc {
     display: none;
@@ -238,20 +236,14 @@
     max-height: calc(100vh - 52px - 10px - var(--gap) * 2);
     max-height: calc(100dvh - 52px - 10px - var(--gap) * 2);
     overflow-y: auto;
-    overscroll-behavior: contain;
+    /* 滚动条始终隐藏（不占宽度），鼠标悬停时卡片不会被挤窄；滚轮仍可滚动，滚到头后继续滚动页面 */
     scrollbar-width: none;
     /* 给阴影留空间 */
     padding: 2px 10px 24px;
     margin: -2px -10px 0;
   }
   .side::-webkit-scrollbar {
-    width: 0;
-  }
-  .side:hover {
-    scrollbar-width: thin;
-  }
-  .side:hover::-webkit-scrollbar {
-    width: 6px;
+    display: none;
   }
   .side-right .toc {
     display: flex;
@@ -456,6 +448,8 @@ html.lock {
 .drawer .glass {
   box-shadow: none;
   background: rgb(var(--surface) / 0.6);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 .drawer-nav {
   padding: 6px;

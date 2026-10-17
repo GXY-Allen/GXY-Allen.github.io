@@ -19,7 +19,6 @@ import SearchModal from '../components/SearchModal.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { getActivity } from '../utils/posts';
 
-import 'katex/dist/katex.min.css';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/layout.css';
@@ -37,6 +36,8 @@ interface Props {
   currentCategory?: string;
   hasToc?: boolean;
   article?: { published: Date; modified: Date; tags: string[] };
+  /** 只有这个页面需要的样式表（例如公式） */
+  styles?: string[];
 }
 
 const {
@@ -47,6 +48,7 @@ const {
   currentCategory,
   hasToc = false,
   article,
+  styles = [],
 } = Astro.props;
 
 const fullTitle = title ? `${title} | ${SITE.title}` : SITE.title;
@@ -90,6 +92,7 @@ const pageAnim = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {styles.map((href) => <link rel="stylesheet" href={href} />)}
     <meta name="theme-color" content={SITE.appearance.primary} />
     <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:title" content={title ?? SITE.title} />
@@ -118,7 +121,8 @@ const pageAnim = {
             try { var d = localStorage.getItem('blog-bg-upload'); if (d) return { kind: 'image', css: 'url("' + d + '")' }; } catch (e) {}
           }
           var p = backgrounds.find(function (b) { return b.id === s.bg; }) || backgrounds.find(function (b) { return b.id === D.bg; }) || backgrounds[0];
-          return { kind: p.type, css: p.type === 'image' ? 'url("' + p.value + '")' : p.value };
+          var src = p.small && window.innerWidth < 1280 ? p.small : p.value;
+          return { kind: p.type, css: p.type === 'image' ? 'url("' + src + '")' : p.value };
         }
         function apply() {
           var s = read();
@@ -134,6 +138,7 @@ const pageAnim = {
           st.setProperty('--primary', s.primary);
           st.setProperty('--bg-value', bg.css);
           st.setProperty('--bg-blur', (+s.bgBlur || 0) + 'px');
+          root.dataset.blur = +s.bgBlur > 0 ? 'on' : 'off';
           st.setProperty('--card-alpha', String(s.cardOpacity));
           st.setProperty('--article-size', s.fontSize + 'px');
           var meta = document.querySelector('meta[name="theme-color"]');
@@ -203,7 +208,7 @@ const pageAnim = {
     <Footer />
     <Fabs hasToc={hasToc} />
     <slot name="overlay" />
-    <Drawer current={currentCategory} />
+    <Drawer />
     <SettingsPanel />
     <SearchModal />
     <Lightbox />

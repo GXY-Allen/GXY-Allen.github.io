@@ -2,8 +2,12 @@
 import { SITE } from '../site.config';
 import Icon from './Icon.astro';
 ---
-<section class="hero glass" data-reveal>
-  {SITE.banner && <div class="hero-bg" style={`background-image:url(${SITE.banner})`} aria-hidden="true" />}
+<section class:list={['hero glass', { 'hero-plain': !SITE.banner }]} data-reveal>
+  {
+    SITE.banner && (
+      <div class="hero-bg" style={`--hero-lg:url(${SITE.banner});--hero-sm:url(${SITE.bannerSmall || SITE.banner})`} aria-hidden="true" />
+    )
+  }
   <div class="hero-shade" aria-hidden="true"></div>
   <div class="hero-content">
     <h1 class="hero-title">{SITE.title}</h1>

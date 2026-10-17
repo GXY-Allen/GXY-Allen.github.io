@@ -5,11 +5,11 @@ let io: IntersectionObserver | null = null;
 
 function initReveal() {
   io?.disconnect();
-  const targets = [...$$('[data-reveal]:not(.revealed)'), ...$$('.prose > *')];
-  if (!motionOn() || !('IntersectionObserver' in window)) {
-    targets.forEach((el) => el.classList.add('revealed'));
-    return;
-  }
+  if (!motionOn() || !('IntersectionObserver' in window)) return;
+  const candidates = [...$$('[data-reveal]:not(.revealed)'), ...$$('.prose > *')];
+  // 先一次性读取位置（避免读写交替导致反复重排），首屏内的元素直接显示
+  const limit = innerHeight * 0.92;
+  const below = candidates.filter((el) => el.getBoundingClientRect().top > limit);
   io = new IntersectionObserver(
     (entries) => {
       for (const en of entries) {
@@ -21,15 +21,8 @@ function initReveal() {
     },
     { rootMargin: '0px 0px -5% 0px', threshold: 0.04 },
   );
-  for (const el of targets) {
-    if (el.parentElement?.classList.contains('prose')) {
-      // 首屏内的正文直接显示，避免闪烁
-      if (el.getBoundingClientRect().top < innerHeight) {
-        el.classList.add('reveal-item', 'revealed');
-        continue;
-      }
-      el.classList.add('reveal-item');
-    }
+  for (const el of below) {
+    el.classList.add('will-reveal');
     io.observe(el);
   }
 }

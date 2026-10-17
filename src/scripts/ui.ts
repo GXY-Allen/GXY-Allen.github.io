@@ -126,15 +126,8 @@ document.addEventListener('pointerdown', (e) => {
 /* 滚动：顶栏自动隐藏、阅读进度、回到顶部 */
 let lastY = window.scrollY;
 const onScroll = rafThrottle(() => {
+  // 读：先把需要的位置都读出来
   const y = window.scrollY;
-  const topbar = $('#topbar');
-  if (topbar) {
-    const delta = y - lastY;
-    if (y < 120 || delta < -6) topbar.classList.remove('hide');
-    else if (delta > 6 && !current) topbar.classList.add('hide');
-  }
-  lastY = y;
-
   const article = $('.post');
   let p: number;
   if (article) {
@@ -145,13 +138,23 @@ const onScroll = rafThrottle(() => {
     const max = document.documentElement.scrollHeight - innerHeight;
     p = max > 0 ? y / max : 0;
   }
+  // 目录高亮等也在这里读位置
+  window.dispatchEvent(new CustomEvent('blog:scroll', { detail: { y, p } }));
+
+  // 写：最后统一修改页面
+  const topbar = $('#topbar');
+  if (topbar) {
+    const delta = y - lastY;
+    if (y < 120 || delta < -6) topbar.classList.remove('hide');
+    else if (delta > 6 && !current) topbar.classList.add('hide');
+  }
+  lastY = y;
   $('#read-progress')?.style.setProperty('--progress', String(p));
   const fab = $('.fab-top');
   if (fab) {
     fab.classList.toggle('show', y > 400);
     fab.style.setProperty('--p', String(Math.round(p * 100)));
   }
-  window.dispatchEvent(new CustomEvent('blog:scroll', { detail: { y, p } }));
 });
 window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', onScroll, { passive: true });

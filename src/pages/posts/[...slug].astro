@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import katexCss from 'katex/dist/katex.min.css?url';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import Toc from '../../components/Toc.astro';
@@ -29,6 +30,9 @@ const hasToc = headings.filter((h: { depth: number }) => h.depth >= 2 && h.depth
 const crumbs = post.category.map((name, i) => ({ name, href: categoryUrl(post.category.slice(0, i + 1)) }));
 const ogImage = typeof post.cover === 'string' ? post.cover : post.cover?.src;
 const hasMermaid = /^```mermaid/m.test(post.entry.body ?? '');
+// 只有含公式的文章才加载公式样式（约 23KB + 字体）
+const bodyNoCode = (post.entry.body ?? '').replace(/^(```|~~~)[\s\S]*?^\1/gm, '').replace(/`[^`\n]*`/g, '');
+const hasMath = /\$\$|(^|[^\\$])\$[^\s$][^$\n]*\$/m.test(bodyNoCode);
 ---
 <BaseLayout
   variant="post"
@@ -38,6 +42,7 @@ const hasMermaid = /^```mermaid/m.test(post.entry.body ?? '');
   currentCategory={post.categoryKey}
   hasToc={hasToc}
   article={{ published: post.date, modified: post.updated, tags: post.tags }}
+  styles={hasMath ? [katexCss] : []}
 >
   <Toc slot="right-top" headings={headings} />
   <div slot="overlay" class="toc-popover" id="toc-popover" aria-hidden="true">
@@ -66,7 +71,7 @@ const hasMermaid = /^```mermaid/m.test(post.entry.body ?? '');
       )}
     </header>
 
-    <div data-pagefind-ignore><SeriesCard post={post} /></div>
+    {post.series && <div class="series-wrap" data-pagefind-ignore><SeriesCard post={post} /></div>}
 
     <div class="prose" id="article">
       <Content />

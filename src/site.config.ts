@@ -12,6 +12,8 @@ export interface BackgroundPreset {
   value: string;
   /** 设置面板里的缩略预览（可选，默认用 value） */
   thumb?: string;
+  /** 屏幕宽度小于 1280px 时用的小图（可选，省流量） */
+  small?: string;
 }
 
 export const SITE = {
@@ -60,8 +62,10 @@ export const SITE = {
     '代码是写给人看的，顺便能在机器上运行。',
   ],
 
-  /** 首页横幅图片（留空则用主题渐变） */
-  banner: '/images/banner.jpg',
+  /** 首页横幅图片（留空则用主题渐变）；bannerSmall 是窄屏和侧栏用的小图（可选） */
+  banner: '/images/banner.webp',
+  bannerSmall: '/images/banner-960.webp',
+  bannerThumb: '/images/banner-600.webp',
 
   /** 右栏公告，支持简单 HTML */
   notice: '欢迎来到我的博客！这里记录我的学习笔记和一些想法。点右上角的 🎨 可以切换主题色和背景哦～',
@@ -89,7 +93,7 @@ export const SITE = {
 
   /** 可选背景。想加自己的图：放到 public/images/ 下，再在这里加一项 */
   backgrounds: [
-    { id: 'photo', name: '雪山湖畔', type: 'image', value: '/images/background.jpg', thumb: '/images/background-thumb.jpg' },
+    { id: 'photo', name: '雪山湖畔', type: 'image', value: '/images/background.webp', small: '/images/background-1600.webp', thumb: '/images/background-thumb.webp' },
     { id: 'aurora', name: '极光', type: 'gradient', value: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 35%, #fbc2eb 70%, #a6c1ee 100%)' },
     { id: 'sunset', name: '晚霞', type: 'gradient', value: 'linear-gradient(160deg, #ffecd2 0%, #fcb69f 45%, #ff9a9e 100%)' },
     { id: 'forest', name: '森林', type: 'gradient', value: 'linear-gradient(160deg, #d4fc79 0%, #96e6a1 50%, #43c6ac 100%)' },

@@ -127,7 +127,7 @@ function level(a?: DayActivity) {
   return Math.min(4, Math.max(byWords, a.n >= 3 ? 3 : 1));
 }
 
-function renderHeatmap() {
+export function renderHeatmap() {
   for (const box of $$('.heatmap')) renderHeatmapIn(box);
 }
 
