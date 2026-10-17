@@ -262,12 +262,31 @@
 .site-footer {
   padding: 0 var(--page-pad) calc(1.5rem + env(safe-area-inset-bottom));
 }
+/* 页脚不用卡片，文字直接放在背景上 */
 .footer-inner {
   margin: 0 auto;
-  padding: 1.125rem 1.25rem;
+  padding: 0.25rem 1.25rem 0;
   text-align: center;
   font-size: 0.8438rem;
   color: var(--text-2);
+}
+/* 背景是图片时：浅色文字 + 深色阴影，在任何图片上都看得清 */
+:root[data-bg='image'] .footer-inner {
+  --text-2: rgb(255 255 255 / 0.92);
+  --text-3: rgb(255 255 255 / 0.78);
+  --primary-text: color-mix(in srgb, var(--primary) 35%, #fff);
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.55),
+    0 0 0.75rem rgb(0 0 0 / 0.35);
+}
+:root[data-bg='image'] .footer-inner .icon {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.55));
+}
+/* 窄屏：两侧留出右下角悬浮按钮的位置，文字不被遮住 */
+@media (max-width: 640px) {
+  .footer-inner {
+    padding-inline: 3.75rem;
+  }
 }
 .footer-line {
   display: flex;

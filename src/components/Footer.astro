@@ -6,7 +6,7 @@ const year = new Date().getFullYear();
 const startYear = new Date(SITE.since).getFullYear();
 ---
 <footer class="site-footer" transition:name="footer" transition:animate="none">
-  <div class="footer-inner glass">
+  <div class="footer-inner">
     <div class="footer-line">
       © {startYear === year ? year : `${startYear} - ${year}`} <a href="/about/">{SITE.author.name}</a>
       <span class="dot">·</span>
