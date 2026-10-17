@@ -10,11 +10,7 @@
   right: 0;
   z-index: 40;
   padding: 0.625rem var(--page-pad) 0;
-  transition: transform 0.45s var(--ease);
   pointer-events: none;
-}
-.topbar.hide {
-  transform: translateY(calc(-100% - 0.375rem));
 }
 .topbar-inner {
   pointer-events: auto;

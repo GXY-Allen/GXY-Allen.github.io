@@ -123,8 +123,7 @@ document.addEventListener('pointerdown', (e) => {
   setTimeout(() => span.remove(), 650);
 });
 
-/* 滚动：顶栏自动隐藏、阅读进度、回到顶部 */
-let lastY = window.scrollY;
+/* 滚动：阅读进度、回到顶部（顶栏始终固定显示） */
 const onScroll = rafThrottle(() => {
   // 读：先把需要的位置都读出来
   const y = window.scrollY;
@@ -142,13 +141,6 @@ const onScroll = rafThrottle(() => {
   window.dispatchEvent(new CustomEvent('blog:scroll', { detail: { y, p } }));
 
   // 写：最后统一修改页面
-  const topbar = $('#topbar');
-  if (topbar) {
-    const delta = y - lastY;
-    if (y < 120 || delta < -6) topbar.classList.remove('hide');
-    else if (delta > 6 && !current) topbar.classList.add('hide');
-  }
-  lastY = y;
   $('#read-progress')?.style.setProperty('--progress', String(p));
   const fab = $('.fab-top');
   if (fab) {
@@ -193,6 +185,5 @@ function initNavIndicator() {
 
 export function initUI() {
   initNavIndicator();
-  lastY = window.scrollY;
   onScroll();
 }
