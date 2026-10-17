@@ -227,8 +227,10 @@
     position: sticky;
     top: calc(3.25rem + 0.625rem + var(--gap));
     align-self: start;
-    max-height: calc(100vh - 3.25rem - 0.625rem - var(--gap) * 2);
-    max-height: calc(100dvh - 3.25rem - 0.625rem - var(--gap) * 2);
+    /* 底部预留页脚的高度：滚到页面最底部时，侧栏不会被页脚顶上去和顶栏重叠。
+       --footer-h 由脚本按页脚实际高度设置，7rem 是脚本运行前的近似值 */
+    max-height: calc(100vh - 3.25rem - 0.625rem - var(--gap) * 2 - var(--footer-h, 7rem));
+    max-height: calc(100dvh - 3.25rem - 0.625rem - var(--gap) * 2 - var(--footer-h, 7rem));
     overflow-y: auto;
     /* 滚动条始终隐藏（不占宽度），鼠标悬停时卡片不会被挤窄；滚轮仍可滚动，滚到头后继续滚动页面 */
     scrollbar-width: none;

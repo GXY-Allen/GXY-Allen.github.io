@@ -183,7 +183,22 @@ function initNavIndicator() {
   nav.addEventListener('mouseleave', () => moveTo(active()));
 }
 
+/* 记录页脚实际高度，侧栏据此在底部预留空间（页脚换行、缩放、换页时自动更新） */
+let footerObserver: ResizeObserver | null = null;
+function trackFooterHeight() {
+  const footer = $('.site-footer');
+  if (!footer) return;
+  const set = () => document.documentElement.style.setProperty('--footer-h', `${footer.offsetHeight}px`);
+  set();
+  footerObserver?.disconnect();
+  if ('ResizeObserver' in window) {
+    footerObserver = new ResizeObserver(set);
+    footerObserver.observe(footer);
+  }
+}
+
 export function initUI() {
   initNavIndicator();
+  trackFooterHeight();
   onScroll();
 }
