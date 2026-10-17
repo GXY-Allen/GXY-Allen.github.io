@@ -76,14 +76,6 @@ const thumbStyle = (b: (typeof bgs)[number]) =>
         <span><Icon name="sparkles" size={16} /> 动画特效</span>
         <input type="checkbox" class="switch" data-setting="motion" />
       </label>
-      {
-        SITE.features.live2d.enable && (
-          <label class="switch-row">
-            <span><Icon name="user" size={16} /> 看板娘（宽屏电脑）</span>
-            <input type="checkbox" class="switch" data-setting="live2d" />
-          </label>
-        )
-      }
     </div>
 
     <button class="btn block ghost" data-settings-reset><Icon name="reset" size={16} /> 恢复默认</button>

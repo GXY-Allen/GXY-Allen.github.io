@@ -63,7 +63,6 @@ const settingsDefaults = {
   bgBlur: SITE.appearance.backgroundBlur,
   cardOpacity: SITE.appearance.cardOpacity,
   fontSize: SITE.appearance.fontSize,
-  live2d: SITE.features.live2d.enable,
 };
 const backgrounds = SITE.backgrounds;
 
@@ -208,7 +207,6 @@ const pageAnim = {
     <SettingsPanel />
     <SearchModal />
     <Lightbox />
-    <div id="waifu-host" transition:persist="waifu"></div>
 
     <script type="application/json" id="activity-data" set:html={activityJson} />
     <script>

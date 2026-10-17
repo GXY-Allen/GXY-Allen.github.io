@@ -11,7 +11,6 @@ export interface Settings {
   cardOpacity: number;
   fontSize: number;
   motion: boolean;
-  live2d: boolean;
 }
 
 interface BlogApi {
@@ -26,7 +25,6 @@ interface BlogApi {
 declare global {
   interface Window {
     __blog: BlogApi;
-    initWidget?: (cfg: Record<string, unknown>) => void;
   }
 }
 

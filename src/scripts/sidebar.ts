@@ -50,9 +50,12 @@ function goDay(day: string, data: DayActivity) {
 }
 
 function renderCalendar(dir: 'left' | 'right' | null = null) {
-  const box = $('.calendar');
-  const grid = $('.cal-grid', box ?? document);
-  if (!box || !grid) return;
+  for (const box of $$('.calendar')) renderCalendarIn(box, dir);
+}
+
+function renderCalendarIn(box: HTMLElement, dir: 'left' | 'right' | null) {
+  const grid = $('.cal-grid', box);
+  if (!grid) return;
   const act = activity();
   const today = ymd(new Date());
   const first = new Date(calYear, calMonth, 1);
@@ -125,10 +128,13 @@ function level(a?: DayActivity) {
 }
 
 function renderHeatmap() {
-  const box = $('.heatmap');
-  const grid = $('.hm-grid', box ?? document);
-  const months = $('.hm-months', box ?? document);
-  if (!box || !grid || !months) return;
+  for (const box of $$('.heatmap')) renderHeatmapIn(box);
+}
+
+function renderHeatmapIn(box: HTMLElement) {
+  const grid = $('.hm-grid', box);
+  const months = $('.hm-months', box);
+  if (!grid || !months) return;
   const width = grid.clientWidth || box.clientWidth - 32;
   if (width <= 0) return;
   const CELL = 11;

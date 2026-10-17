@@ -2,7 +2,7 @@
 
 基于 [Astro](https://astro.build) 的个人博客，部署在 GitHub Pages：<https://gxy-allen.github.io>
 
-毛玻璃三栏布局 · 亮/暗主题 · 背景与主题色可自定义 · 全文搜索 · 分类树 / 标签 / 专栏 · 写作热力图 · 看板娘 · 手机电脑都适配。
+毛玻璃三栏布局 · 亮/暗主题 · 背景与主题色可自定义 · 全文搜索 · 分类树 / 标签 / 专栏 · 写作热力图 · 手机电脑都适配。
 
 ---
 
@@ -73,11 +73,10 @@ order: 1
 
 ## 自定义外观
 
-改 `src/site.config.ts`：标题、头像、简介、导航、社交链接、公告、默认主题色、背景图、每页篇数、看板娘 / 访问统计 / 热力图开关。
+改 `src/site.config.ts`：标题、头像、简介、导航、社交链接、公告、默认主题色、背景图、每页篇数、访问统计 / 热力图开关。
 
 - 换背景：图片放到 `public/images/`，在 `backgrounds` 里加一项并改 `appearance.background`
 - 关于页：`src/content/pages/about.md`
-- 看板娘台词：`public/live2d/waifu-tips.json`
 
 访客也可以点右上角 🎨 自己调颜色、背景、字号（只保存在他们自己的浏览器里）。
 

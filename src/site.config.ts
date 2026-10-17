@@ -99,14 +99,6 @@ export const SITE = {
 
   /** 功能开关 */
   features: {
-    /** Live2D 看板娘（只在宽屏电脑上加载） */
-    live2d: {
-      enable: true,
-      /** 最小屏幕宽度，小于它不加载 */
-      minWidth: 1024,
-      /** 默认模型序号（对应 public/live2d/waifu-tips.json 里 models 的顺序） */
-      modelId: 0,
-    },
     /** 不蒜子访问统计（全站 PV/UV、文章阅读量） */
     busuanzi: true,
     /** 发文热力图 */

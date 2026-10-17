@@ -185,16 +185,8 @@
     width: 38px;
     padding: 0;
   }
-  .side-right .side-inner {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-    align-items: start;
-  }
-  .side-right .toc,
-  .side-right .search-box {
-    display: none;
-  }
-  .layout-post .side-right {
+  /* 右栏工具都在左上角菜单里，主体下方不再重复显示 */
+  .side-right {
     display: none;
   }
 }
@@ -634,19 +626,7 @@ html.lock {
   background: rgb(255 255 255 / 0.25);
   color: #fff;
 }
-
-/* 看板娘容器 */
-#waifu-host {
-  position: relative;
-  z-index: 30;
-}
 .drawer-body > *,
 .settings-body > * {
   flex-shrink: 0;
-}
-@media (max-width: 1599.98px) {
-  #waifu-host #waifu {
-    transform: scale(0.8);
-    transform-origin: bottom left;
-  }
 }

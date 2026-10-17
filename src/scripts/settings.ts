@@ -41,7 +41,7 @@ function sync() {
     const out = $(`[data-out="${key}"]`, panel);
     if (out) out.textContent = fmt[key](+s[key]);
   }
-  for (const key of ['motion', 'live2d'] as const) {
+  for (const key of ['motion'] as const) {
     const input = $<HTMLInputElement>(`input[data-setting="${key}"]`, panel);
     if (input) input.checked = !!s[key];
   }
