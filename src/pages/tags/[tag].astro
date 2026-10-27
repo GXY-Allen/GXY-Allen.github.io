@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import PostList from '../../components/PostList.astro';
-import ListEnd from '../../components/ListEnd.astro';
 import { getTags, type TagInfo } from '../../utils/posts';
 
 export async function getStaticPaths() {
@@ -16,5 +15,4 @@ const { tag } = Astro.props;
 <BaseLayout title={`标签：${tag.name}`} description={`标签「${tag.name}」下的文章`}>
   <PageHeader title={`#${tag.name}`} icon="hash" subtitle={`共 ${tag.posts.length} 篇文章`} crumbs={[{ name: '标签', href: '/tags/' }, { name: tag.name }]} />
   <PostList posts={tag.posts} />
-  <ListEnd />
 </BaseLayout>

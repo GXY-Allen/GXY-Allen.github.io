@@ -1099,9 +1099,11 @@ a.page-btn:hover {
   text-overflow: ellipsis;
 }
 
-/* 标签墙 */
+/* 标签墙：直接放在页面头部卡片里，不再单独占一张大卡片 */
 .tag-wall {
-  padding: clamp(1.125rem, 2.4vw, 1.75rem);
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--line);
   display: flex;
   flex-wrap: wrap;
   gap: 0.625rem;
@@ -1995,19 +1997,4 @@ input[type='range']::-moz-range-thumb {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* 列表末尾：内容短时向下延伸填满，并逐渐淡出，不会变成一大块空卡片 */
-.list-end {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  min-height: 3.25rem;
-  padding-top: 1rem;
-  font-size: 0.8125rem;
-  letter-spacing: 2px;
-  color: var(--text-3);
-  box-shadow: none;
-  -webkit-mask-image: linear-gradient(#000 0, #000 3.25rem, transparent 100%);
-  mask-image: linear-gradient(#000 0, #000 3.25rem, transparent 100%);
 }

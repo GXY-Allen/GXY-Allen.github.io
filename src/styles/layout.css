@@ -251,13 +251,6 @@
     display: inline-block;
   }
 }
-/* 三栏时：中间内容比侧栏短（如归档、分类页），最后一张卡片延伸到与侧栏底部对齐，不留空白 */
-@media (min-width: 1280px) {
-  .main > .glass:last-child {
-    flex-grow: 1;
-  }
-}
-
 /* ============ 页脚 ============ */
 .site-footer {
   padding: 0 var(--page-pad) calc(1.5rem + env(safe-area-inset-bottom));

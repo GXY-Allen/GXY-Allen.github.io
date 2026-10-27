@@ -3,7 +3,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Icon from '../../components/Icon.astro';
 import Cover from '../../components/Cover.astro';
-import ListEnd from '../../components/ListEnd.astro';
 import { getCategoryTree, flattenCategories, postsUnder, formatDate } from '../../utils/posts';
 
 const tree = await getCategoryTree();
@@ -36,5 +35,4 @@ const total = flattenCategories(tree).length;
       })
     }
   </div>
-  <ListEnd />
 </BaseLayout>

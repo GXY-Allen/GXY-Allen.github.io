@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import PostList from '../../components/PostList.astro';
-import ListEnd from '../../components/ListEnd.astro';
 import { getCategoryTree, flattenCategories, postsUnder, type CategoryNode } from '../../utils/posts';
 import { slugSegment } from '../../utils/paths';
 
@@ -42,5 +41,4 @@ const crumbs = [
     }
   </PageHeader>
   <PostList posts={posts} />
-  <ListEnd />
 </BaseLayout>

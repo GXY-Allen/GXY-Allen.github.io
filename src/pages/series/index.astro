@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Icon from '../../components/Icon.astro';
-import ListEnd from '../../components/ListEnd.astro';
 import { getSeries, formatDate, formatWords } from '../../utils/posts';
 
 const series = await getSeries();
@@ -31,5 +30,4 @@ const series = await getSeries();
       ))
     }
   </div>
-  <ListEnd />
 </BaseLayout>
