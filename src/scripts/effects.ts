@@ -105,9 +105,28 @@ export function initEffects() {
   initTyped();
 }
 
+/* 换页时旧画面只在正文这一栏淡出（animations.css）：记下正文栏的左右边界，取到它和侧栏之间空隙的中线 */
+function markMainColumn() {
+  const main = $('.main');
+  if (!main) return;
+  const m = main.getBoundingClientRect();
+  let left = 0;
+  let right = Infinity;
+  for (const side of $$('.side-inner')) {
+    const s = side.getBoundingClientRect();
+    if (!s.width) continue; // 窄屏时侧栏隐藏
+    if (s.right <= m.left) left = Math.max(left, (s.right + m.left) / 2);
+    else if (s.left >= m.right) right = Math.min(right, (m.right + s.left) / 2);
+  }
+  const st = document.documentElement.style;
+  st.setProperty('--vt-main-l', `${left}px`);
+  st.setProperty('--vt-main-r', right === Infinity ? '100%' : `${right}px`);
+}
+
 /* 换页时侧栏已经显示过，不再重复入场动画；新页面的正文从下方滑入 */
 document.addEventListener('astro:after-swap', () => {
   $$('.side [data-reveal], .drawer [data-reveal]').forEach((el) => el.classList.add('revealed'));
+  markMainColumn();
   const main = $('.main');
   if (!main || !motionOn()) return;
   main.classList.add('page-enter');

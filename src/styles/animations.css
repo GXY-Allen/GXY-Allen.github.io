@@ -19,6 +19,11 @@
     opacity: 0;
   }
 }
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+  }
+}
 @keyframes ripple {
   to {
     transform: scale(1);
@@ -132,18 +137,25 @@ html[data-motion='on'] .series-box.will-reveal.revealed {
     box-shadow 0.4s var(--ease);
 }
 
-/* 换页：新页面整体淡入盖住旧画面（顶栏、侧栏、背景前后一样，看起来不动），正文再从下方滑入。
-   正文只能动 transform：opacity、filter 会让里面卡片的毛玻璃模糊不到背景 */
+/* 换页：旧画面盖在新页面上面淡出，但左右裁到正文那一栏（边界由 effects.ts 测量）。
+   顶栏、侧栏、背景直接就是新页面，两页侧栏内容不同（如进入文章时右栏换成目录）也不会叠出重影；
+   正文同时从下方滑入（.page-enter），只能动 transform：opacity、filter 会让里面卡片的毛玻璃模糊不到背景 */
 html[data-astro-transition]::view-transition-old(root) {
-  animation: none;
+  z-index: 1;
+  clip-path: inset(0 calc(100% - var(--vt-main-r, 100%)) 0 var(--vt-main-l, 0px));
+  animation: fadeOut 0.3s var(--ease) both;
   mix-blend-mode: normal;
 }
 html[data-astro-transition]::view-transition-new(root) {
-  animation: fadeIn 0.3s var(--ease) both;
+  animation: none;
   mix-blend-mode: normal;
 }
 .main.page-enter {
   animation: pageRise 0.42s var(--ease);
+}
+/* 截取旧画面时不带弹层、遮罩和顶部进度条：它们横跨整屏，只在正文栏里淡出、两侧却瞬间消失，会出现接缝 */
+html[data-astro-transition] :is(.overlay, .search-modal, .settings-panel, .drawer, .toc-popover, .lightbox, .tooltip, .read-progress) {
+  display: none;
 }
 
 /* 关闭动效 */
