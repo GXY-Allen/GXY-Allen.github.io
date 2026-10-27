@@ -6,7 +6,7 @@ const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' || /^\/page\/\d+\/?$/.test(path) || path.startsWith('/posts/') : path.startsWith(href.replace(/\/$/, ''));
 ---
-<header class="topbar" id="topbar" transition:name="topbar" transition:animate="none">
+<header class="topbar" id="topbar">
   <div class="topbar-inner glass">
     <button class="icon-btn menu-btn" data-open="drawer" aria-label="打开菜单">
       <Icon name="menu" size={20} />

@@ -68,16 +68,8 @@ const settingsDefaults = {
 };
 const backgrounds = SITE.backgrounds;
 
-const pageAnim = {
-  forwards: {
-    old: { name: 'pageOut', duration: '160ms', easing: 'ease-in', fillMode: 'both' },
-    new: { name: 'pageIn', duration: '420ms', easing: 'cubic-bezier(.22,1,.36,1)', fillMode: 'both' },
-  },
-  backwards: {
-    old: { name: 'pageOut', duration: '160ms', easing: 'ease-in', fillMode: 'both' },
-    new: { name: 'pageIn', duration: '420ms', easing: 'cubic-bezier(.22,1,.36,1)', fillMode: 'both' },
-  },
-};
+// 换页动画是整页淡入 + 正文上滑（animations.css、effects.ts），页面上的元素都不设 transition:name / transition:animate：
+// 带 view-transition-name 的元素会截断里面卡片的毛玻璃，平时模糊不到背景，悬停文章卡片时又局部模糊，出现一块块竖条
 ---
 <!doctype html>
 <html lang={SITE.lang} data-theme="light" data-motion="on">
@@ -180,7 +172,7 @@ const pageAnim = {
     <Topbar />
 
     <div class={`layout layout-${variant}`}>
-      <aside class="side side-left" transition:name="side-left" transition:animate="none" aria-label="侧边栏">
+      <aside class="side side-left" aria-label="侧边栏">
         <div class="side-inner">
           <ProfileCard />
           <CategoryTree current={currentCategory} />
@@ -188,11 +180,11 @@ const pageAnim = {
         </div>
       </aside>
 
-      <main id="main" class="main" transition:animate={pageAnim}>
+      <main id="main" class="main">
         <slot />
       </main>
 
-      <aside class="side side-right" transition:name="side-right" transition:animate="none" aria-label="工具栏">
+      <aside class="side side-right" aria-label="工具栏">
         <div class="side-inner">
           <slot name="right-top" />
           <SearchBox />

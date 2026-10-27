@@ -105,7 +105,16 @@ export function initEffects() {
   initTyped();
 }
 
-/* 换页时侧栏已经显示过，不再重复入场动画 */
+/* 换页时侧栏已经显示过，不再重复入场动画；新页面的正文从下方滑入 */
 document.addEventListener('astro:after-swap', () => {
   $$('.side [data-reveal], .drawer [data-reveal]').forEach((el) => el.classList.add('revealed'));
+  const main = $('.main');
+  if (!main || !motionOn()) return;
+  main.classList.add('page-enter');
+  const done = (e: AnimationEvent) => {
+    if (e.target !== main) return;
+    main.classList.remove('page-enter');
+    main.removeEventListener('animationend', done);
+  };
+  main.addEventListener('animationend', done);
 });
