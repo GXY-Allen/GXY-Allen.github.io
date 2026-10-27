@@ -103,8 +103,6 @@ export const SITE = {
 
   /** 功能开关 */
   features: {
-    /** 不蒜子访问统计（全站 PV/UV、文章阅读量） */
-    busuanzi: true,
     /** 发文热力图 */
     heatmap: true,
     /** 文章里出现 ```mermaid 代码块时自动渲染流程图 */

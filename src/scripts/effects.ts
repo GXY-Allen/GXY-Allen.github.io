@@ -105,35 +105,74 @@ export function initEffects() {
   initTyped();
 }
 
-/* 换页时旧画面只在正文这一栏淡出（animations.css）：记下正文栏的左右边界，取到它和侧栏之间空隙的中线 */
-function markMainColumn() {
+/* ---------------- 换页过渡 ----------------
+   旧画面盖在新页面上淡出，但只露出正文栏和侧栏里有变化的卡片（遮罩见 animations.css），其余地方直接就是新页面。
+   侧栏卡片前后位置、大小都一样的保持不动；新出现或挪了位置的，旧的随旧画面淡出、新的稍后淡入，不会叠出重影 */
+interface Card {
+  key: string;
+  el: Element;
+  r: DOMRect;
+}
+let oldCards: Card[] = [];
+
+/** 侧栏里看得见的卡片；类名相同的卡片在两页之间算同一张 */
+function sideCards(): Card[] {
+  const seen = new Map<string, number>();
+  return $$('.side-inner > *').flatMap((el) => {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return []; // 窄屏时侧栏隐藏
+    const cls = [...el.classList].filter((c) => !['revealed', 'will-reveal', 'side-enter'].includes(c)).join('.');
+    const n = seen.get(cls) ?? 0;
+    seen.set(cls, n + 1);
+    return [{ key: `${cls}#${n}`, el, r }];
+  });
+}
+
+/** 加一个动画类，播完就去掉 */
+function playOnce(el: Element, cls: string) {
+  el.classList.add(cls);
+  const done = (e: Event) => {
+    if (e.target !== el) return;
+    el.classList.remove(cls);
+    el.removeEventListener('animationend', done);
+  };
+  el.addEventListener('animationend', done);
+}
+
+const maskBox = (x: number, y: number, w: string, h: string) => `linear-gradient(#000 0 0) ${x}px ${y}px / ${w} ${h} no-repeat`;
+const sameBox = (a: DOMRect, b: DOMRect) =>
+  Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
+
+document.addEventListener('astro:before-swap', () => {
+  oldCards = sideCards();
+});
+
+document.addEventListener('astro:after-swap', () => {
+  // 换页时侧栏已经显示过，不再重复入场动画
+  $$('.side [data-reveal], .drawer [data-reveal]').forEach((el) => el.classList.add('revealed'));
   const main = $('.main');
   if (!main) return;
+  // 正文栏：左右各延伸到它和侧栏之间空隙的中线
   const m = main.getBoundingClientRect();
   let left = 0;
   let right = Infinity;
   for (const side of $$('.side-inner')) {
     const s = side.getBoundingClientRect();
-    if (!s.width) continue; // 窄屏时侧栏隐藏
+    if (!s.width) continue;
     if (s.right <= m.left) left = Math.max(left, (s.right + m.left) / 2);
     else if (s.left >= m.right) right = Math.min(right, (m.right + s.left) / 2);
   }
-  const st = document.documentElement.style;
-  st.setProperty('--vt-main-l', `${left}px`);
-  st.setProperty('--vt-main-r', right === Infinity ? '100%' : `${right}px`);
-}
-
-/* 换页时侧栏已经显示过，不再重复入场动画；新页面的正文从下方滑入 */
-document.addEventListener('astro:after-swap', () => {
-  $$('.side [data-reveal], .drawer [data-reveal]').forEach((el) => el.classList.add('revealed'));
-  markMainColumn();
-  const main = $('.main');
-  if (!main || !motionOn()) return;
-  main.classList.add('page-enter');
-  const done = (e: AnimationEvent) => {
-    if (e.target !== main) return;
-    main.classList.remove('page-enter');
-    main.removeEventListener('animationend', done);
-  };
-  main.addEventListener('animationend', done);
+  const layers = [maskBox(left, 0, right === Infinity ? `calc(100% - ${left}px)` : `${right - left}px`, '100%')];
+  const kept = new Set<string>();
+  for (const c of sideCards()) {
+    const old = oldCards.find((o) => o.key === c.key);
+    if (old && sameBox(old.r, c.r)) kept.add(c.key);
+    else if (motionOn()) playOnce(c.el, 'side-enter');
+  }
+  // 变了的旧卡片（连同一圈阴影）随旧画面一起淡出
+  for (const { key, r } of oldCards) if (!kept.has(key)) layers.push(maskBox(r.x - 12, r.y - 12, `${r.width + 24}px`, `${r.height + 24}px`));
+  document.documentElement.style.setProperty('--vt-old-mask', layers.join(', '));
+  oldCards = [];
+  // 新页面的正文从下方滑入
+  if (motionOn()) playOnce(main, 'page-enter');
 });

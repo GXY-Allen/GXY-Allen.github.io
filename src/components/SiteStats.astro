@@ -14,13 +14,5 @@ const s = await getStats();
     <li><span><Icon name="pen" size={15} /> 总字数</span><b>{formatWords(s.words)}</b></li>
     <li><span><Icon name="clock" size={15} /> 运行天数</span><b data-since={SITE.since}>-</b></li>
     <li><span><Icon name="history" size={15} /> 最后更新</span><b>{s.posts ? formatDate(s.lastUpdate) : '-'}</b></li>
-    {
-      SITE.features.busuanzi && (
-        <>
-          <li class="bsz-item"><span><Icon name="eye" size={15} /> 总访问量</span><b><span class="bsz" data-bsz="site_pv">…</span></b></li>
-          <li class="bsz-item"><span><Icon name="users" size={15} /> 访客数</span><b><span class="bsz" data-bsz="site_uv">…</span></b></li>
-        </>
-      )
-    }
   </ul>
 </section>

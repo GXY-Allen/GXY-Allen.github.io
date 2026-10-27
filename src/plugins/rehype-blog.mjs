@@ -42,7 +42,7 @@ export default function rehypeBlog() {
           'div',
           { className: ['code-block', ...(collapsible ? ['collapsible', 'collapsed'] : [])], dataLang: lang || 'text' },
           [
-            el('div', { className: ['code-head'], dataPagefindIgnore: '' }, [
+            el('div', { className: ['code-head'] }, [
               el('span', { className: ['code-dots'], ariaHidden: 'true' }, [el('i', {}), el('i', {}), el('i', {})]),
               el('span', { className: ['code-lang'] }, [{ type: 'text', value: lang || 'text' }]),
               el('button', { className: ['code-copy'], type: 'button', ariaLabel: '复制代码' }, [{ type: 'text', value: '复制' }]),

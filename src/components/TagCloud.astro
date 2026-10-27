@@ -12,7 +12,7 @@ const max = Math.max(1, ...shown.map((t) => t.posts.length));
 ---
 {
   tags.length > 0 && (
-    <section class="widget glass" data-reveal>
+    <section class="widget glass tag-widget" data-reveal>
       <div class="widget-head">
         <h2 class="widget-title"><Icon name="tag" size={17} /> 标签</h2>
         {tags.length > limit && <a class="widget-more" href="/tags/">更多 <Icon name="chevron-right" size={14} /></a>}

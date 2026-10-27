@@ -54,6 +54,11 @@ export function plain(md: string): string {
     .trim();
 }
 
+/** 站内搜索用的纯文本：同 plain，但保留代码块里的内容，方便搜命令和配置 */
+export function searchText(md: string): string {
+  return plain(md.replace(/^(```|~~~)[^\n]*\n([\s\S]*?)^\1/gm, ' $2 '));
+}
+
 export function countWords(md: string): number {
   const text = plain(md);
   const cjk = (text.match(/[㐀-鿿豈-﫿]/g) ?? []).length;

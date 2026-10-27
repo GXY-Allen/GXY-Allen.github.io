@@ -578,9 +578,6 @@
 .stats-list b {
   font-variant-numeric: tabular-nums;
 }
-.bsz-item.hidden {
-  display: none !important;
-}
 
 /* ============ 首页横幅 ============ */
 .hero {

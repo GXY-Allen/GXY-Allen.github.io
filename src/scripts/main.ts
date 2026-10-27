@@ -5,7 +5,6 @@ import { initResponsive } from './responsive';
 import { initPost } from './post';
 import { initSettings } from './settings';
 import { initSearch } from './search';
-import { initExtras } from './extras';
 
 document.documentElement.classList.add('js');
 
@@ -26,5 +25,4 @@ document.addEventListener('astro:page-load', () => {
   safe(initEffects);
   safe(initSettings);
   safe(initSearch);
-  safe(initExtras);
 });

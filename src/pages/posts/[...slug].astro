@@ -49,35 +49,34 @@ const hasMath = /\$\$|(^|[^\\$])\$[^\s$][^$\n]*\$/m.test(bodyNoCode);
     <Toc headings={headings} variant="popover" />
   </div>
 
-  <article class="post glass" data-pagefind-body data-mermaid={hasMermaid ? '' : undefined}>
+  <article class="post glass" data-mermaid={hasMermaid ? '' : undefined}>
     {explicitCover && <div class="post-cover-hero"><Cover src={explicitCover} alt="" width={1200} eager /></div>}
     <header class="post-header">
-      <nav class="breadcrumb" aria-label="面包屑" data-pagefind-ignore>
+      <nav class="breadcrumb" aria-label="面包屑">
         <a href="/"><Icon name="home" size={14} /> 首页</a>
         {crumbs.map((c) => (<><Icon name="chevron-right" size={13} class="sep" /><a href={c.href}>{c.name}</a></>))}
       </nav>
-      <h1 class="post-title" data-pagefind-meta="title">{post.title}</h1>
-      <div class="post-meta" data-pagefind-ignore>
+      <h1 class="post-title">{post.title}</h1>
+      <div class="post-meta">
         <span title="发布时间"><Icon name="calendar" size={15} /><time datetime={post.date.toISOString()}>{formatDate(post.date)}</time></span>
         {showUpdated && <span title="最后更新"><Icon name="history" size={15} />更新于 {formatDate(post.updated)}</span>}
         <span><Icon name="pen" size={15} />{formatWords(post.words)} 字</span>
         <span><Icon name="clock" size={15} />约 {post.minutes} 分钟</span>
-        {SITE.features.busuanzi && <span class="bsz-item"><Icon name="eye" size={15} /><span class="bsz" data-bsz="page_pv">…</span> 次阅读</span>}
       </div>
       {post.tags.length > 0 && (
-        <div class="post-tags" data-pagefind-ignore>
+        <div class="post-tags">
           {post.tags.map((t) => <a class="chip" href={tagUrl(t)} data-ripple>#{t}</a>)}
         </div>
       )}
     </header>
 
-    {post.series && <div class="series-wrap" data-pagefind-ignore><SeriesCard post={post} /></div>}
+    {post.series && <div class="series-wrap"><SeriesCard post={post} /></div>}
 
     <div class="prose" id="article">
       <Content />
     </div>
 
-    <footer class="post-footer" data-pagefind-ignore>
+    <footer class="post-footer">
       <div class="post-end"><span>— 完 —</span></div>
       <div class="post-share">
         <span>本文作者：<a href="/about/">{SITE.author.name}</a></span>

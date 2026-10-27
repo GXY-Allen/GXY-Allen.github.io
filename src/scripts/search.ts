@@ -1,6 +1,15 @@
-/** 站内搜索（Pagefind，构建时生成索引；开发模式下退回到标题搜索） */
+/** 站内搜索：构建时生成全文索引（search-index.json），按原文逐字匹配。
+ *  不用分词，所以「博客」「预览」这类词、任意中文片段都能搜到 */
 import { navigate } from 'astro:transitions/client';
 import { $, $$, activity } from './util';
+
+interface Doc {
+  url: string;
+  title: string;
+  desc: string;
+  tags: string;
+  text: string;
+}
 
 interface Hit {
   url: string;
@@ -8,24 +17,53 @@ interface Hit {
   excerpt: string;
 }
 
-let pagefind: any = null;
-let pagefindFailed = false;
+let docsPromise: Promise<Doc[]> | null = null;
+let indexFailed = false;
 
-async function getPagefind() {
-  if (pagefind || pagefindFailed) return pagefind;
-  try {
-    const url = '/pagefind/pagefind.js';
-    pagefind = await import(/* @vite-ignore */ url);
-    await pagefind.options({ excerptLength: 40 });
-    pagefind.init();
-  } catch {
-    pagefindFailed = true;
-    pagefind = null;
-  }
-  return pagefind;
+function loadDocs(): Promise<Doc[]> {
+  docsPromise ??= fetch('/search-index.json')
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then((docs: Doc[]) => {
+      indexFailed = false;
+      return docs;
+    })
+    .catch(() => {
+      indexFailed = true;
+      docsPromise = null; // 下次搜索时再试
+      return [];
+    });
+  return docsPromise;
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** 转义 HTML，并给关键词套上 <mark> */
+function highlight(s: string, re: RegExp): string {
+  let out = '';
+  let last = 0;
+  for (const m of s.matchAll(re)) {
+    out += esc(s.slice(last, m.index)) + `<mark>${esc(m[0])}</mark>`;
+    last = m.index! + m[0].length;
+  }
+  return out + esc(s.slice(last));
+}
+
+/** 正文里第一处关键词前后的一段 */
+function snippet(text: string, pattern: string, re: RegExp): string {
+  const at = new RegExp(pattern, 'i').exec(text)?.index;
+  if (at === undefined) return '';
+  const start = Math.max(0, at - 20);
+  const end = Math.min(text.length, at + 70);
+  return (start > 0 ? '…' : '') + highlight(text.slice(start, end), re) + (end < text.length ? '…' : '');
+}
+
+/** 出现次数（最多数到 5 次） */
+function count(hay: string, w: string): number {
+  let n = 0;
+  for (let i = hay.indexOf(w); i >= 0 && n < 5; i = hay.indexOf(w, i + w.length)) n++;
+  return n;
+}
 
 /** 退回方案：在标题里找 */
 function titleSearch(q: string): Hit[] {
@@ -45,15 +83,38 @@ function titleSearch(q: string): Hit[] {
   return hits;
 }
 
+/** 空格分开的每个词都要出现（标题、摘要、分类标签或正文里都算），标题里出现的排在前面 */
 async function runSearch(q: string): Promise<Hit[]> {
-  const pf = await getPagefind();
-  if (!pf) return titleSearch(q);
-  const res = await pf.search(q);
-  const data = await Promise.all(res.results.slice(0, 12).map((r: any) => r.data()));
-  return data.map((d: any) => ({
-    url: d.url,
-    title: esc(d.meta?.title ?? d.url),
-    excerpt: d.excerpt,
+  const docs = await loadDocs();
+  if (!docs.length) return titleSearch(q);
+  const words = [...new Set(q.toLowerCase().split(/\s+/).filter(Boolean))];
+  const pattern = words
+    .sort((a, b) => b.length - a.length)
+    .map(escRe)
+    .join('|');
+  const re = new RegExp(pattern, 'gi');
+  const scored: { doc: Doc; score: number }[] = [];
+  for (const doc of docs) {
+    const title = doc.title.toLowerCase();
+    const meta = `${doc.desc} ${doc.tags}`.toLowerCase();
+    const text = doc.text.toLowerCase();
+    let score = 0;
+    for (const w of words) {
+      const s = (title.includes(w) ? 10 : 0) + (meta.includes(w) ? 3 : 0) + count(text, w);
+      if (!s) {
+        score = 0;
+        break;
+      }
+      score += s;
+    }
+    if (score) scored.push({ doc, score });
+  }
+  // 同分时保持索引里的顺序（新文章在前）
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, 12).map(({ doc }) => ({
+    url: doc.url,
+    title: highlight(doc.title, re),
+    excerpt: snippet(doc.text, pattern, re) || highlight(doc.desc, re),
   }));
 }
 
@@ -97,7 +158,7 @@ function bind(root: HTMLElement) {
         </a>`,
       )
       .join('');
-    if (pagefindFailed) out.insertAdjacentHTML('beforeend', '<p class="search-tip">（本地开发模式只搜索标题，构建后支持全文搜索）</p>');
+    if (indexFailed) out.insertAdjacentHTML('beforeend', '<p class="search-tip">（全文索引没能加载，只搜索了标题）</p>');
   };
 
   input.addEventListener('input', () => {
@@ -127,7 +188,7 @@ window.addEventListener('blog:open', ((e: CustomEvent<string>) => {
   const modal = $('#search-modal');
   if (!modal) return;
   bind(modal);
-  getPagefind();
+  loadDocs();
   setTimeout(() => $<HTMLInputElement>('.search-input', modal)?.focus(), 60);
 }) as EventListener);
 

@@ -18,6 +18,7 @@ import SettingsPanel from '../components/SettingsPanel.astro';
 import SearchModal from '../components/SearchModal.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { getActivity } from '../utils/posts';
+import { BUILD_ID } from '../utils/build';
 
 import '../styles/tokens.css';
 import '../styles/base.css';
@@ -68,7 +69,7 @@ const settingsDefaults = {
 };
 const backgrounds = SITE.backgrounds;
 
-// 换页动画是正文栏淡入淡出 + 上滑（animations.css、effects.ts），页面上的元素都不设 transition:name / transition:animate：
+// 换页动画是正文栏淡入淡出 + 上滑、侧栏变化的卡片淡入（animations.css、effects.ts），页面上的元素都不设 transition:name / transition:animate：
 // 带 view-transition-name 的元素会截断里面卡片的毛玻璃，平时模糊不到背景，悬停文章卡片时又局部模糊，出现一块块竖条
 ---
 <!doctype html>
@@ -80,6 +81,7 @@ const backgrounds = SITE.backgrounds;
     <meta name="description" content={description} />
     <meta name="author" content={SITE.author.name} />
     <meta name="generator" content={Astro.generator} />
+    <meta name="build" content={BUILD_ID} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />

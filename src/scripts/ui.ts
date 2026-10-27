@@ -1,4 +1,5 @@
 /** 全局交互：弹层、主题切换、快捷键、导航栏、滚动进度、点击涟漪 */
+import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
 import { $, $$, blog, motionOn, rafThrottle } from './util';
 
 type PanelName = 'drawer' | 'settings' | 'search' | 'toc';
@@ -157,6 +158,18 @@ document.addEventListener('astro:before-swap', () => {
     current = null;
     window.dispatchEvent(new CustomEvent('blog:close', { detail: name }));
   }
+});
+
+/* 网站更新过（版本号对不上）：直接整页打开新页面，不把新版本拼到还在运行的旧脚本上，
+   否则旧标签页里第一次换页可能出现显示问题，要刷新才消失 */
+document.addEventListener('astro:before-preparation', (e) => {
+  const ev = e as TransitionBeforePreparationEvent;
+  const load = ev.loader;
+  ev.loader = async () => {
+    await load();
+    const build = (doc: Document) => doc.querySelector('meta[name="build"]')?.getAttribute('content');
+    if (build(ev.newDocument) !== build(document)) ev.preventDefault();
+  };
 });
 
 /* ---------------- 每次换页执行 ---------------- */

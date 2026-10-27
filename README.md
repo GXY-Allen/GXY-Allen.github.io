@@ -73,7 +73,7 @@ order: 1
 
 ## 自定义外观
 
-改 `src/site.config.ts`：标题、头像、简介、导航、社交链接、公告、默认主题色、背景图、每页篇数、访问统计 / 热力图开关。
+改 `src/site.config.ts`：标题、头像、简介、导航、社交链接、公告、默认主题色、背景图、每页篇数、热力图开关。
 
 - 换背景：图片放到 `public/images/`，在 `backgrounds` 里加一项并改 `appearance.background`
 - 关于页：`src/content/pages/about.md`
