@@ -161,31 +161,70 @@ document.addEventListener('astro:before-swap', closeLightbox);
 /* ---------------- Mermaid ---------------- */
 const MERMAID = 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
 let mermaidMod: any = null;
+let mermaidQueue = Promise.resolve();
+let mermaidIO: IntersectionObserver | null = null;
 
-async function renderMermaid() {
+/** 依次渲染（同时调用 mermaid.run 会互相干扰）；渲染过的图表留着源码，换明暗时可以重画 */
+function renderMermaid(blocks: HTMLElement[]) {
+  mermaidQueue = mermaidQueue.then(async () => {
+    blocks = blocks.filter((b) => b.isConnected);
+    if (!blocks.length) return;
+    try {
+      mermaidMod ??= (await import(/* @vite-ignore */ MERMAID)).default;
+      const dark = document.documentElement.dataset.theme === 'dark';
+      mermaidMod.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'strict', fontFamily: 'inherit' });
+      for (const b of blocks) {
+        b.dataset.src ??= b.textContent ?? '';
+        b.removeAttribute('data-processed');
+        b.textContent = b.dataset.src;
+      }
+      await mermaidMod.run({ nodes: blocks });
+    } catch (err) {
+      console.warn('Mermaid 渲染失败', err);
+    }
+  });
+}
+
+/** 换页动画（.page-enter）播完再继续：加载、渲染 Mermaid 是几十毫秒的长任务，放在动画期间会卡顿 */
+function afterPageEnter() {
+  return new Promise<void>((resolve) => {
+    const main = $('.main');
+    if (!main?.classList.contains('page-enter')) return resolve();
+    main.addEventListener('animationend', function done(e) {
+      if (e.target !== main) return;
+      main.removeEventListener('animationend', done);
+      resolve();
+    });
+    setTimeout(resolve, 800);
+  });
+}
+
+/* Mermaid 约 1MB：图表滚到附近才加载、渲染，大多数时候换页时根本不用它 */
+function observeMermaid() {
+  mermaidIO?.disconnect();
   const blocks = $$<HTMLElement>('pre.mermaid');
   if (!blocks.length) return;
-  try {
-    mermaidMod ??= (await import(/* @vite-ignore */ MERMAID)).default;
-    const dark = document.documentElement.dataset.theme === 'dark';
-    mermaidMod.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'strict', fontFamily: 'inherit' });
-    for (const b of blocks) {
-      b.dataset.src ??= b.textContent ?? '';
-      b.removeAttribute('data-processed');
-      b.textContent = b.dataset.src;
-    }
-    await mermaidMod.run({ nodes: blocks });
-  } catch (err) {
-    console.warn('Mermaid 渲染失败', err);
-  }
+  const entered = afterPageEnter();
+  mermaidIO = new IntersectionObserver(
+    (entries) => {
+      const near = entries.filter((en) => en.isIntersecting).map((en) => en.target as HTMLElement);
+      if (!near.length) return;
+      near.forEach((b) => mermaidIO?.unobserve(b));
+      entered.then(() => renderMermaid(near));
+    },
+    { rootMargin: '600px 0px' },
+  );
+  blocks.forEach((b) => mermaidIO!.observe(b));
 }
+
 let lastTheme = '';
 window.addEventListener('blog:settings', () => {
   const t = document.documentElement.dataset.theme ?? '';
-  if (t !== lastTheme && $('pre.mermaid')) {
-    lastTheme = t;
-    renderMermaid();
-  }
+  if (t === lastTheme) return;
+  lastTheme = t;
+  // 只重画已经画过的，还没滚到的以后画时自然用新的配色
+  const drawn = $$<HTMLElement>('pre.mermaid[data-src]');
+  if (drawn.length) renderMermaid(drawn);
 });
 
 export function initPost() {
@@ -193,5 +232,5 @@ export function initPost() {
   initAnchors();
   initToc();
   lastTheme = document.documentElement.dataset.theme ?? '';
-  renderMermaid();
+  observeMermaid();
 }

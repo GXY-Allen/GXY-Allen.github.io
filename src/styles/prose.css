@@ -416,6 +416,11 @@
   max-width: 100%;
   height: auto;
 }
+/* Mermaid 往 body 末尾加的提示框（securityLevel: 'strict' 下用不到）会让页面在页脚下面多出几像素，
+   滚到最底部时侧栏被顶上去，换页时整栏卡片都被当成"变了" */
+.mermaidTooltip {
+  display: none !important;
+}
 
 /* 表格 */
 .table-wrap {

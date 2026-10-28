@@ -1,5 +1,7 @@
 /** 视觉特效：滚动显现、卡片 3D 倾斜、横幅视差、打字机 */
 import { $, $$, finePointer, motionOn } from './util';
+import { layoutSidebar } from './sidebar';
+import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
 
 let io: IntersectionObserver | null = null;
 
@@ -7,9 +9,12 @@ function initReveal() {
   io?.disconnect();
   if (!motionOn() || !('IntersectionObserver' in window)) return;
   const candidates = [...$$('[data-reveal]:not(.revealed)'), ...$$('.prose > *')];
-  // 先一次性读取位置（避免读写交替导致反复重排），首屏内的元素直接显示
+  // 先一次性读取位置（避免读写交替导致反复重排），首屏内的元素直接显示。
+  // 换页时正文栏正从下方滑入，要扣掉这段位移，否则首屏底部的内容会被当成在屏幕外藏起来
   const limit = innerHeight * 0.92;
-  const below = candidates.filter((el) => el.getBoundingClientRect().top > limit);
+  const main = $('.main');
+  const shift = main ? new DOMMatrixReadOnly(getComputedStyle(main).transform).m42 : 0;
+  const below = candidates.filter((el) => el.getBoundingClientRect().top - (main?.contains(el) ? shift : 0) > limit);
   io = new IntersectionObserver(
     (entries) => {
       for (const en of entries) {
@@ -106,8 +111,53 @@ export function initEffects() {
 }
 
 /* ---------------- 换页过渡 ----------------
-   旧画面盖在新页面上淡出，但只露出正文栏和侧栏里有变化的卡片（遮罩见 animations.css），其余地方直接就是新页面。
-   侧栏卡片前后位置、大小都一样的保持不动；新出现或挪了位置的，旧的随旧画面淡出、新的稍后淡入，不会叠出重影 */
+   不走浏览器的 View Transition（见 BaseLayout.astro）：旧正文上移、卡片淡下去一点后直接换成新页面，新正文从下方滑入、卡片淡回来（animations.css）。
+   侧栏卡片前后位置、大小都一样的保持不动；新出现或挪了位置的淡入（.side-enter） */
+
+const within = (p: Promise<unknown>, ms: number) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+
+/** 新页面正文里首屏的图片（封面、文章第一张图）先下载、解码好：它们是同步解码的，换上去第一帧就带着，不会先空一块再冒出来 */
+function preloadImages(doc: Document | undefined) {
+  const imgs = doc ? [...doc.querySelectorAll<HTMLImageElement>('.main img[loading="eager"]')] : [];
+  return Promise.all(
+    imgs.map((src) => {
+      const img = new Image();
+      for (const a of ['sizes', 'srcset', 'src']) {
+        const v = src.getAttribute(a);
+        if (v) img.setAttribute(a, v);
+      }
+      return img.decode().catch(() => {});
+    }),
+  );
+}
+
+/* 点击后马上开始离开动画（.page-leave），同时抓取新页面、预载它的首屏图片，都完成才换页，新卡片从同样的不透明度接着淡回来。
+   离开动画最多等 0.4 秒（标签页在后台时动画不推进），图片最多多等 0.25 秒（网速慢时不为它拖住换页） */
+document.addEventListener('astro:before-preparation', (e) => {
+  const ev = e as TransitionBeforePreparationEvent;
+  const main = $('.main');
+  let left: Promise<unknown> = Promise.resolve();
+  if (main && motionOn()) {
+    main.classList.add('page-leave');
+    const leave = main.getAnimations().find((a) => (a as CSSAnimation).animationName === 'pageLeave');
+    if (leave) left = within(leave.finished.catch(() => {}), 400);
+  }
+  const load = ev.loader;
+  ev.loader = async () => {
+    try {
+      await load();
+      await Promise.all([left, within(preloadImages(ev.newDocument), 250)]);
+    } catch (err) {
+      main?.classList.remove('page-leave');
+      throw err;
+    }
+  };
+});
+// 换页失败改成整页跳转后，按返回键从缓存恢复的旧页面不能停在离开动画的样子
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) $('.main')?.classList.remove('page-leave');
+});
+
 interface Card {
   key: string;
   el: Element;
@@ -139,7 +189,6 @@ function playOnce(el: Element, cls: string) {
   el.addEventListener('animationend', done);
 }
 
-const maskBox = (x: number, y: number, w: string, h: string) => `linear-gradient(#000 0 0) ${x}px ${y}px / ${w} ${h} no-repeat`;
 const sameBox = (a: DOMRect, b: DOMRect) =>
   Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
 
@@ -150,29 +199,16 @@ document.addEventListener('astro:before-swap', () => {
 document.addEventListener('astro:after-swap', () => {
   // 换页时侧栏已经显示过，不再重复入场动画
   $$('.side [data-reveal], .drawer [data-reveal]').forEach((el) => el.classList.add('revealed'));
-  const main = $('.main');
-  if (!main) return;
-  // 正文栏：左右各延伸到它和侧栏之间空隙的中线
-  const m = main.getBoundingClientRect();
-  let left = 0;
-  let right = Infinity;
-  for (const side of $$('.side-inner')) {
-    const s = side.getBoundingClientRect();
-    if (!s.width) continue;
-    if (s.right <= m.left) left = Math.max(left, (s.right + m.left) / 2);
-    else if (s.left >= m.right) right = Math.min(right, (m.right + s.left) / 2);
+  // 分类树展开状态、日历、热力图平时在 page-load 才渲染，先渲染成最终尺寸再测量，否则它们和下面的卡片每次都算"变了"
+  layoutSidebar();
+  if (motionOn()) {
+    for (const c of sideCards()) {
+      const old = oldCards.find((o) => o.key === c.key);
+      if (!old || !sameBox(old.r, c.r)) playOnce(c.el, 'side-enter');
+    }
+    // 新页面的正文从下方滑入，卡片淡回来
+    const main = $('.main');
+    if (main) playOnce(main, 'page-enter');
   }
-  const layers = [maskBox(left, 0, right === Infinity ? `calc(100% - ${left}px)` : `${right - left}px`, '100%')];
-  const kept = new Set<string>();
-  for (const c of sideCards()) {
-    const old = oldCards.find((o) => o.key === c.key);
-    if (old && sameBox(old.r, c.r)) kept.add(c.key);
-    else if (motionOn()) playOnce(c.el, 'side-enter');
-  }
-  // 变了的旧卡片（连同一圈阴影）随旧画面一起淡出
-  for (const { key, r } of oldCards) if (!kept.has(key)) layers.push(maskBox(r.x - 12, r.y - 12, `${r.width + 24}px`, `${r.height + 24}px`));
-  document.documentElement.style.setProperty('--vt-old-mask', layers.join(', '));
   oldCards = [];
-  // 新页面的正文从下方滑入
-  if (motionOn()) playOnce(main, 'page-enter');
 });

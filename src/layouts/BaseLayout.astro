@@ -20,12 +20,7 @@ import Lightbox from '../components/Lightbox.astro';
 import { getActivity } from '../utils/posts';
 import { BUILD_ID } from '../utils/build';
 
-import '../styles/tokens.css';
-import '../styles/base.css';
-import '../styles/layout.css';
-import '../styles/components.css';
-import '../styles/prose.css';
-import '../styles/animations.css';
+import '../styles/global.css';
 
 interface Props {
   title?: string;
@@ -69,7 +64,7 @@ const settingsDefaults = {
 };
 const backgrounds = SITE.backgrounds;
 
-// 换页动画是正文栏淡入淡出 + 上滑、侧栏变化的卡片淡入（animations.css、effects.ts），页面上的元素都不设 transition:name / transition:animate：
+// 换页动画是旧正文上移淡出、新正文上滑淡入、侧栏变化的卡片淡入（animations.css、effects.ts），页面上的元素都不设 transition:name / transition:animate：
 // 带 view-transition-name 的元素会截断里面卡片的毛玻璃，平时模糊不到背景，悬停文章卡片时又局部模糊，出现一块块竖条
 ---
 <!doctype html>
@@ -159,12 +154,28 @@ const backgrounds = SITE.backgrounds;
         apply();
         if (!window.__blogBoot) {
           window.__blogBoot = true;
+          // 换页不用浏览器的 View Transition，让 Astro 直接替换页面（ClientRouter fallback="swap"），换页动画全由 effects.ts 加的 class 完成。
+          // View Transition 会先把旧页面重新画一遍来截图，再暂停渲染等新页面：Edge 画这一帧时会在正文的毛玻璃上多出一条竖向色带
+          // （深色下发暗、浅色下发亮），点"下一篇"时一闪而过。Astro 的脚本加载时检查这个方法，所以要在它运行前藏起来；
+          // 明暗切换的圆形扩散仍用它（ui.ts 直接调用原型上的方法）
+          if (document.startViewTransition) Object.defineProperty(document, 'startViewTransition', { value: undefined, configurable: true });
+          // 换页时 <html> 的属性会被换成新页面里的默认值，after-swap 才由 apply() 改回来；这期间浏览器若先算了样式
+          // （后退时恢复滚动位置会立刻排版），颜色、阴影会从默认外观过渡一遍。所以换页前先把当前外观写到新页面上
+          document.addEventListener('astro:before-swap', function (e) {
+            var from = document.documentElement;
+            var to = e.newDocument.documentElement;
+            ['data-theme', 'data-mode', 'data-motion', 'data-bg', 'data-blur', 'style'].forEach(function (name) {
+              var v = from.getAttribute(name);
+              if (v !== null) to.setAttribute(name, v);
+            });
+            to.classList.add('js');
+          });
           document.addEventListener('astro:after-swap', apply);
           window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
         }
       })();
     </script>
-    <ClientRouter fallback="animate" />
+    <ClientRouter fallback="swap" />
   </head>
   <body data-variant={variant}>
     <div id="bg" class="bg-layer" transition:persist="bg" aria-hidden="true"><div class="bg-image"></div></div>

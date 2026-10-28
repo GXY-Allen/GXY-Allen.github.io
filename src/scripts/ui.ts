@@ -53,7 +53,8 @@ function toggleTheme(e: MouseEvent) {
   const root = document.documentElement;
   const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
   const run = () => blog().save({ mode: next });
-  const vt = (document as any).startViewTransition;
+  // document 上的 startViewTransition 被 BaseLayout 藏起来了（换页不用它），这里直接用原型上的
+  const vt = (Document.prototype as any).startViewTransition;
   if (!vt || !motionOn()) return run();
   const x = e.clientX || innerWidth - 60;
   const y = e.clientY || 30;

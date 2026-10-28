@@ -31,7 +31,8 @@ export default defineConfig({
   site: 'https://gxy-allen.github.io',
   trailingSlash: 'ignore',
   integrations: [sitemap(), watchPlugins],
-  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
+  // 鼠标悬停（或键盘聚焦）站内链接时就预取那一页，点下去不用再等网络
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   markdown: {
     syntaxHighlight: { type: 'shiki', excludeLangs: ['math', 'mermaid'] },
     shikiConfig: {

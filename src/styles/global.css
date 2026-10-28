@@ -1,0 +1,9 @@
+/* 全站样式的唯一入口，后面的文件覆盖前面的，顺序不能变。
+   不要在页面里分别引入这几个文件：开发服务器换页时会把多个 <style> 的顺序打乱
+   （例如 base.css 跑到 layout.css 后面，顶栏变透明、出现手机端菜单按钮），合成一个就不会 */
+@import './tokens.css';
+@import './base.css';
+@import './layout.css';
+@import './components.css';
+@import './prose.css';
+@import './animations.css';

@@ -13,13 +13,15 @@ const { src, alt = '', width = 720, class: cls, eager = false } = Astro.props;
 // 图床里的图片在构建时缩小并转成 WebP（与 astro.config.mjs 里的 image.domains 保持一致）
 const optimizable = typeof src === 'string' && /^https:\/\/raw\.githubusercontent\.com\//.test(src);
 const loading = eager ? 'eager' : 'lazy';
+// 首屏的封面同步解码：异步解码时，换页后头几帧封面那里是一块空白，几十毫秒后封面才冒出来
+const decoding = eager ? 'sync' : 'async';
 ---
 {
   typeof src !== 'string' ? (
-    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} loading={loading} />
+    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} loading={loading} decoding={decoding} />
   ) : optimizable ? (
-    <Image src={src} alt={alt} class={cls} inferSize width={width} loading={loading} />
+    <Image src={src} alt={alt} class={cls} inferSize width={width} loading={loading} decoding={decoding} />
   ) : (
-    <img src={src} alt={alt} class={cls} loading={loading} decoding="async" referrerpolicy="no-referrer" />
+    <img src={src} alt={alt} class={cls} loading={loading} decoding={decoding} referrerpolicy="no-referrer" />
   )
 }

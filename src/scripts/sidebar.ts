@@ -1,5 +1,5 @@
 /** 侧栏组件：分类树折叠、日历、热力图、运行天数 */
-import { navigate } from 'astro:transitions/client';
+import { navigate, type TransitionBeforeSwapEvent } from 'astro:transitions/client';
 import { $, $$, activity, ymd, type DayActivity } from './util';
 
 /* ---------------- 分类树 ---------------- */
@@ -31,14 +31,16 @@ document.addEventListener('click', (e) => {
   } catch {}
 });
 
-function initCategoryTree() {
+function initCategoryTree(root: ParentNode = document) {
   for (const key of readOpen()) {
-    $$(`.cat-item.has-children[data-key="${CSS.escape(key)}"]`).forEach((el) => {
+    $$(`.cat-item.has-children[data-key="${CSS.escape(key)}"]`, root).forEach((el) => {
       el.classList.add('open');
       el.querySelector(':scope > .cat-row .cat-toggle')?.setAttribute('aria-expanded', 'true');
     });
   }
 }
+// 换页前就在新页面里展开：后退时恢复滚动位置会立刻排版，之后再展开会重新播一遍展开动画
+document.addEventListener('astro:before-swap', (e) => initCategoryTree((e as TransitionBeforeSwapEvent).newDocument));
 
 /* ---------------- 日历 ---------------- */
 let calYear = 0;
@@ -213,7 +215,8 @@ function initSince() {
   }
 }
 
-export function initSidebar() {
+/** 由脚本渲染、决定卡片高度的部分：分类树展开状态、日历、热力图（换页过渡测量卡片前也要先调用） */
+export function layoutSidebar() {
   initCategoryTree();
   const now = new Date();
   if (!calYear) {
@@ -222,6 +225,10 @@ export function initSidebar() {
   }
   renderCalendar();
   renderHeatmap();
+}
+
+export function initSidebar() {
+  layoutSidebar();
   initSince();
   hideTip();
 }

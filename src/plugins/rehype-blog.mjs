@@ -69,9 +69,11 @@ export default function rehypeBlog() {
         }
       }
       if (node.tagName === 'img') {
+        // 第一张图可能就在首屏：同步解码，换页后第一帧就带着它，不会先空一块（同 Cover.astro）
         if (firstImage) {
           node.properties.loading = 'eager';
           node.properties.fetchpriority = 'high';
+          node.properties.decoding ??= 'sync';
         } else node.properties.loading ??= 'lazy';
         node.properties.decoding ??= 'async';
         firstImage = false;
