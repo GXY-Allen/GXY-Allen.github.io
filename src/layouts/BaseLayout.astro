@@ -116,7 +116,6 @@ const backgrounds = SITE.backgrounds;
         function apply() {
           var s = read();
           var root = document.documentElement;
-          root.classList.add('js');
           var dark = s.mode === 'dark' || (s.mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
           root.dataset.theme = dark ? 'dark' : 'light';
           root.dataset.mode = s.mode;
@@ -168,7 +167,6 @@ const backgrounds = SITE.backgrounds;
               var v = from.getAttribute(name);
               if (v !== null) to.setAttribute(name, v);
             });
-            to.classList.add('js');
           });
           document.addEventListener('astro:after-swap', apply);
           window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);

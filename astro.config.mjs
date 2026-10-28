@@ -58,7 +58,4 @@ export default defineConfig({
     responsiveStyles: false,
     breakpoints: [480, 800, 1200, 1600],
   },
-  vite: {
-    build: { chunkSizeWarningLimit: 1500 },
-  },
 });

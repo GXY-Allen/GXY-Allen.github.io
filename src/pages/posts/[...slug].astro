@@ -29,7 +29,6 @@ const explicitCover = post.entry.data.cover ? post.cover : undefined;
 const hasToc = headings.filter((h: { depth: number }) => h.depth >= 2 && h.depth <= 4 && (h as any).slug !== 'footnote-label').length > 0;
 const crumbs = post.category.map((name, i) => ({ name, href: categoryUrl(post.category.slice(0, i + 1)) }));
 const ogImage = typeof post.cover === 'string' ? post.cover : post.cover?.src;
-const hasMermaid = /^```mermaid/m.test(post.entry.body ?? '');
 // 只有含公式的文章才加载公式样式（约 23KB + 字体）
 const bodyNoCode = (post.entry.body ?? '').replace(/^(```|~~~)[\s\S]*?^\1/gm, '').replace(/`[^`\n]*`/g, '');
 const hasMath = /\$\$|(^|[^\\$])\$[^\s$][^$\n]*\$/m.test(bodyNoCode);
@@ -49,7 +48,7 @@ const hasMath = /\$\$|(^|[^\\$])\$[^\s$][^$\n]*\$/m.test(bodyNoCode);
     <Toc headings={headings} variant="popover" />
   </div>
 
-  <article class="post glass" data-mermaid={hasMermaid ? '' : undefined}>
+  <article class="post glass" data-mermaid={SITE.features.mermaid ? undefined : 'off'}>
     {explicitCover && <div class="post-cover-hero"><Cover src={explicitCover} alt="" width={1200} eager /></div>}
     <header class="post-header">
       <nav class="breadcrumb" aria-label="面包屑">

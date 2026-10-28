@@ -6,8 +6,6 @@ import { initPost } from './post';
 import { initSettings } from './settings';
 import { initSearch } from './search';
 
-document.documentElement.classList.add('js');
-
 function safe(fn: () => void) {
   try {
     fn();
@@ -17,7 +15,6 @@ function safe(fn: () => void) {
 }
 
 document.addEventListener('astro:page-load', () => {
-  document.documentElement.classList.add('js');
   safe(initUI);
   safe(initResponsive);
   safe(initSidebar);

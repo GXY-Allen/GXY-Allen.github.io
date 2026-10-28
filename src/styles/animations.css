@@ -186,11 +186,6 @@ html[data-motion='off'] *::after {
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }
-html[data-motion='off']::view-transition-group(*),
-html[data-motion='off']::view-transition-old(*),
-html[data-motion='off']::view-transition-new(*) {
-  animation: none !important;
-}
 @media (prefers-reduced-motion: reduce) {
   .hero-down,
   .nf-code,
@@ -199,9 +194,14 @@ html[data-motion='off']::view-transition-new(*) {
   }
 }
 
-/* 明暗切换：圆形扩散 */
-html.theme-switching * {
-  view-transition-name: none !important;
+/* 明暗切换：圆形扩散（ui.ts）。
+   圆里露出来的是实时的新页面。颜色、背景、阴影的过渡会让它在动画期间每帧都重算样式（正文颜色是继承的，等于整页重算）、
+   重画、重新光栅化，和圆形动画抢 CPU、GPU，所以切换期间都关掉，圆里一露出来就是最终的颜色；
+   只留切换按钮里太阳、月亮的转动（只在按钮那一小块） */
+html.theme-switching *:not(.theme-icon),
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 html.theme-switching::view-transition-old(root),
 html.theme-switching::view-transition-new(root) {
@@ -210,4 +210,14 @@ html.theme-switching::view-transition-new(root) {
 }
 html.theme-switching::view-transition-new(root) {
   z-index: 2;
+}
+/* Chrome / Edge：新画面放在一个圆形窗口里，ui.ts 的动画改变窗口的大小、位置和 object-position。
+   overflow: clip 才会把画面裁成圆形；动画开始前窗口大小为 0，不会先闪一下整张新画面 */
+html.theme-window::view-transition-new(root) {
+  inset: auto;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  overflow: clip;
+  object-fit: none;
 }

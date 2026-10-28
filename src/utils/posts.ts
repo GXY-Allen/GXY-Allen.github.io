@@ -243,10 +243,6 @@ export function postsUnder(node: CategoryNode): Post[] {
   return [...node.posts, ...node.children.flatMap(postsUnder)].sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
-export async function getCategoryNode(key: string): Promise<CategoryNode | undefined> {
-  return flattenCategories(await getCategoryTree()).find((n) => n.key === key);
-}
-
 /* ---------------- 标签 ---------------- */
 
 export interface TagInfo {

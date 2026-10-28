@@ -16,7 +16,7 @@ const minDepth = Math.min(...items.map((h) => h.depth), 4);
 ---
 {
   items.length > 0 && (
-    <nav class:list={['toc', `toc-v-${variant}`, { 'widget glass': variant === 'side' }]} aria-label="文章目录">
+    <nav class:list={['toc', { 'widget glass': variant === 'side' }]} aria-label="文章目录">
       <div class="widget-head">
         <h2 class="widget-title"><Icon name="list" size={17} /> 目录</h2>
         <span class="toc-percent" aria-hidden="true">0%</span>

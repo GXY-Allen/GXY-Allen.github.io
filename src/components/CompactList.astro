@@ -9,7 +9,7 @@ interface Props {
 }
 const { posts, numbered = false, showCategory = true } = Astro.props;
 ---
-<ol class:list={['compact-list', { numbered }]}>
+<ol class="compact-list">
   {
     posts.map((p, i) => (
       <li data-reveal style={`--i:${i % 8}`}>

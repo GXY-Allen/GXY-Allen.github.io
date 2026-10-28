@@ -47,7 +47,15 @@ export function closePanel() {
   window.dispatchEvent(new CustomEvent('blog:close', { detail: name }));
 }
 
-export const isOpen = (name?: PanelName) => (name ? current === name : current !== null);
+let switching: ViewTransition | null = null;
+/** 明暗切换的圆形扩散播完（没在切换时立刻完成）。重活放到这之后做，动画期间新画面不会变、不用每帧重画 */
+export const themeSettled = (): Promise<unknown> => switching?.finished.catch(() => {}) ?? Promise.resolve();
+
+/* 圆形扩散有两种画法，看起来一样（逐像素比对过）：
+   Chrome / Edge 里把新画面放进一个 border-radius: 50% 的正方形窗口，窗口从点击处长大，object-position 让画面始终对齐屏幕（.theme-window）。
+   这几个浏览器会把 clip-path 动画的圆形蒙版每帧重新光栅化一遍，再带着整页毛玻璃重新合成，实测帧率只有窗口画法的六七成。
+   其他浏览器没法验证窗口画法，仍用 clip-path */
+const windowReveal = 'userAgentData' in navigator;
 
 function toggleTheme(e: MouseEvent) {
   const root = document.documentElement;
@@ -59,17 +67,43 @@ function toggleTheme(e: MouseEvent) {
   const x = e.clientX || innerWidth - 60;
   const y = e.clientY || 30;
   const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-  root.classList.add('theme-switching');
-  const t = vt.call(document, run);
+  // .theme-switching 和新主题在同一次样式计算里生效：整页样式只算一遍，颜色、阴影的过渡也不会启动（animations.css）
+  const t: ViewTransition = vt.call(document, () => {
+    root.classList.add('theme-switching');
+    root.classList.toggle('theme-window', windowReveal);
+    run();
+  });
+  switching = t;
   t.ready
     .then(() => {
-      root.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
-        { duration: 550, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' },
-      );
+      // fill: forwards：动画播完到浏览器拆掉切换画面之间还会画一帧，这一帧要停在终点。
+      // 否则圆形窗口退回 CSS 里的 0 大小，整屏露出旧主题的截图，切换结束时闪一下
+      const timing: KeyframeAnimationOptions = {
+        duration: 550,
+        easing: 'cubic-bezier(.22,1,.36,1)',
+        fill: 'forwards',
+        pseudoElement: '::view-transition-new(root)',
+      };
+      if (windowReveal)
+        root.animate(
+          {
+            width: ['0px', `${2 * r}px`],
+            height: ['0px', `${2 * r}px`],
+            left: [`${x}px`, `${x - r}px`],
+            top: [`${y}px`, `${y - r}px`],
+            objectPosition: [`${-x}px ${-y}px`, `${r - x}px ${r - y}px`],
+          },
+          timing,
+        );
+      else root.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] }, timing);
     })
     .catch(() => {});
-  t.finished.finally(() => root.classList.remove('theme-switching'));
+  // 连点时前一次切换会提前结束，这时不能把下一次还要用的类去掉
+  t.finished.finally(() => {
+    if (switching !== t) return;
+    switching = null;
+    root.classList.remove('theme-switching', 'theme-window');
+  });
 }
 
 /* ---------------- 一次性注册的全局事件 ---------------- */

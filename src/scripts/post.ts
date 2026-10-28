@@ -1,5 +1,6 @@
 /** 文章页：代码块、标题锚点、目录高亮、图片灯箱、Mermaid、复制链接 */
 import { $, $$, copyText, motionOn, toast } from './util';
+import { themeSettled } from './ui';
 
 /* ---------------- 代码块 ---------------- */
 document.addEventListener('click', async (e) => {
@@ -202,6 +203,8 @@ function afterPageEnter() {
 /* Mermaid 约 1MB：图表滚到附近才加载、渲染，大多数时候换页时根本不用它 */
 function observeMermaid() {
   mermaidIO?.disconnect();
+  // site.config.ts 里关掉了流程图（features.mermaid）：只显示源码
+  if ($('.post[data-mermaid="off"]')) return;
   const blocks = $$<HTMLElement>('pre.mermaid');
   if (!blocks.length) return;
   const entered = afterPageEnter();
@@ -222,9 +225,9 @@ window.addEventListener('blog:settings', () => {
   const t = document.documentElement.dataset.theme ?? '';
   if (t === lastTheme) return;
   lastTheme = t;
-  // 只重画已经画过的，还没滚到的以后画时自然用新的配色
+  // 只重画已经画过的，还没滚到的以后画时自然用新的配色；等明暗切换的动画播完再画，免得动画卡顿
   const drawn = $$<HTMLElement>('pre.mermaid[data-src]');
-  if (drawn.length) renderMermaid(drawn);
+  if (drawn.length) themeSettled().then(() => renderMermaid(drawn));
 });
 
 export function initPost() {

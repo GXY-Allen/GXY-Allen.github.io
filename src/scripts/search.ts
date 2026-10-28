@@ -76,7 +76,7 @@ function titleSearch(q: string): Hit[] {
       if (!seen.has(p.u) && words.every((w) => t.includes(w))) {
         seen.add(p.u);
         let title = esc(p.t);
-        for (const w of words) title = title.replace(new RegExp(esc(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), (m) => `<mark>${m}</mark>`);
+        for (const w of words) title = title.replace(new RegExp(escRe(esc(w)), 'gi'), (m) => `<mark>${m}</mark>`);
         hits.push({ url: p.u, title, excerpt: '' });
       }
     }
