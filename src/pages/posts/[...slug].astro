@@ -44,7 +44,7 @@ const hasMath = /\$\$|(^|[^\\$])\$[^\s$][^$\n]*\$/m.test(bodyNoCode);
   styles={hasMath ? [katexCss] : []}
 >
   <Toc slot="right-top" headings={headings} />
-  <div slot="overlay" class="toc-popover" id="toc-popover" aria-hidden="true">
+  <div slot="overlay" class="toc-popover" id="toc-popover" aria-hidden="true" inert tabindex="-1">
     <Toc headings={headings} variant="popover" />
   </div>
 

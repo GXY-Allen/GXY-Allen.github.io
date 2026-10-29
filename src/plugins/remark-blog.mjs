@@ -5,19 +5,27 @@
  *  3. 把 md 里单独的 HTML <img> 转成普通图片，本地图片也能被优化
  *  4. 统一图片路径（反斜杠、URL 编码），找不到的本地图片给出中文警告而不是让构建失败
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { visit, SKIP } from 'unist-util-visit';
-import { imageMetadata, inferRemoteSize } from 'astro/assets/utils';
+import { imageMetadata } from 'astro/assets/utils';
+import { getRemoteImageSize } from '../utils/remote-images.mjs';
 
 /** 图片原始尺寸缓存（同一张图在多篇文章里只读一次） */
 const sizeCache = new Map();
 async function naturalSize(url, base) {
-  const key = /^https?:/.test(url) ? url : resolve(base, decodeURI(url));
+  if (url.startsWith('data:')) return null;
+  const remote = /^(https?:)?\/\//i.test(url);
+  let decoded = url;
+  try { decoded = decodeURI(url); } catch {}
+  const key = remote ? (url.startsWith('//') ? `https:${url}` : url)
+    : url.startsWith('/') ? resolve('public', `.${decoded}`) : resolve(base, decoded);
+  if (remote) return getRemoteImageSize(key);
   if (!sizeCache.has(key)) {
     sizeCache.set(
       key,
-      (/^https?:/.test(url) ? inferRemoteSize(url) : imageMetadata(readFileSync(key), key)).catch(() => null),
+      readFile(key).then((data) => imageMetadata(data, key)).catch(() => null),
     );
   }
   return sizeCache.get(key);
@@ -43,7 +51,7 @@ function imageNode(url, alt, extra) {
   return node;
 }
 
-export default function remarkBlog() {
+export default function remarkBlog({ imageDomains = [] } = {}) {
   return async (tree, file) => {
     // 1. 去掉开头的一级标题
     const first = tree.children.find((n) => n.type !== 'yaml' && n.type !== 'toml');
@@ -60,7 +68,7 @@ export default function remarkBlog() {
         if (m.index > last) parts.push({ type: 'text', value: node.value.slice(last, m.index) });
         const target = m[1].trim();
         const alt = m[2] && !/^\d+(x\d+)?$/.test(m[2]) ? m[2] : '';
-        const width = m[2] && /^\d+/.test(m[2]) ? m[2].split('x')[0] : null;
+        const width = m[2] && /^\d+(x\d+)?$/.test(m[2]) ? m[2].split('x')[0] : null;
         parts.push(imageNode(encodeURI(target), alt, width ? { width: Number(width) } : undefined));
         last = m.index + m[0].length;
       }
@@ -136,20 +144,30 @@ export default function remarkBlog() {
 
     // 5. 只写了高度的图片（如 <img height="400">）：按原图比例换算成宽度。
     //    只给高度时图片会被裁剪；换算成宽度后按比例缩放，不裁剪、不跳动。
-    const heightOnly = [];
+    const sizedImages = [];
     visit(tree, 'image', (node) => {
       const hp = node.data?.hProperties;
-      if (hp?.height && !hp.width) heightOnly.push(node);
+      const remote = /^(https?:)?\/\//i.test(node.url);
+      let optimizedRemote = false;
+      if (remote) {
+        try { optimizedRemote = imageDomains.includes(new URL(node.url, 'https://localhost').hostname); } catch {}
+      }
+      if ((hp?.height && !hp.width) || optimizedRemote) sizedImages.push({ node, optimizedRemote });
     });
     await Promise.all(
-      heightOnly.map(async (node) => {
-        const hp = node.data.hProperties;
+      sizedImages.map(async ({ node, optimizedRemote }) => {
+        node.data ??= {};
+        const hp = node.data.hProperties ??= {};
         const size = base ? await naturalSize(node.url, base) : null;
         if (size?.width && size?.height) {
           // 宽高都按原图比例给出（只给一边时另一边会被填成原图尺寸）
-          hp.width = Math.min(size.width, Math.round((hp.height * size.width) / size.height));
+          hp.width = Math.min(size.width, hp.width || (hp.height ? Math.round((hp.height * size.width) / size.height) : size.width));
           hp.height = Math.round((hp.width * size.height) / size.width);
-        } else delete hp.height;
+        } else {
+          if (optimizedRemote) hp.dataRemoteFallback = true;
+          if (hp.height) hp.style = [hp.style, `max-height:${hp.height}px;width:auto`].filter(Boolean).join(';');
+          delete hp.height;
+        }
       }),
     );
   };

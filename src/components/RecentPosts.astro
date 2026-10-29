@@ -16,7 +16,7 @@ const posts = (await getPosts()).slice(0, 5);
           <li>
             <a href={p.url} class="recent-item" data-ripple>
               <span class="recent-thumb">
-                {p.cover ? <Cover src={p.cover} alt="" width={96} /> : <span class="recent-thumb-ph">{p.title.slice(0, 1)}</span>}
+                {p.cover ? <Cover src={p.cover} alt="" width={96} sizes="3.25rem" /> : <span class="recent-thumb-ph">{p.title.slice(0, 1)}</span>}
               </span>
               <span class="recent-text">
                 <span class="recent-title">{p.title}</span>

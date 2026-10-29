@@ -27,7 +27,7 @@ const hasChildren = n.children.length > 0;
   </div>
   {
     hasChildren && (
-      <div class="cat-children">
+      <div class="cat-children" inert={!open}>
         <ul>
           {n.children.map((c) => <Astro.self node={c} current={current} />)}
         </ul>

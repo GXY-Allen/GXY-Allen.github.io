@@ -1,6 +1,6 @@
 /** 全局交互：弹层、主题切换、快捷键、导航栏、滚动进度、点击涟漪 */
 import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
-import { $, $$, blog, motionOn, rafThrottle } from './util';
+import { $, $$, blog, motionOn, rafThrottle, trapFocus } from './util';
 
 type PanelName = 'drawer' | 'settings' | 'search' | 'toc';
 const panelSel: Record<PanelName, string> = {
@@ -10,29 +10,35 @@ const panelSel: Record<PanelName, string> = {
   toc: '#toc-popover',
 };
 let current: PanelName | null = null;
+let releaseFocus: ReturnType<typeof trapFocus> | null = null;
 
 export function openPanel(name: PanelName) {
   if (current) closePanel();
   const el = $(panelSel[name]);
   if (!el) return;
   current = name;
+  el.inert = false;
   el.classList.add('open');
   el.setAttribute('aria-hidden', 'false');
   const ov = $(`[data-overlay="${name}"]`);
   if (ov) {
     ov.hidden = false;
-    requestAnimationFrame(() => ov.classList.add('show'));
+    requestAnimationFrame(() => { if (current === name) ov.classList.add('show'); });
   }
   if (name !== 'toc') document.documentElement.classList.add('lock');
-  $(`[data-open="${name}"]`)?.setAttribute('aria-expanded', 'true');
+  $$(`[data-open="${name}"]`).forEach((button) => button.setAttribute('aria-expanded', 'true'));
   window.dispatchEvent(new CustomEvent('blog:open', { detail: name }));
+  releaseFocus = trapFocus(el);
 }
 
-export function closePanel() {
+export function closePanel(restoreFocus = true) {
   if (!current) return;
   const name = current;
   current = null;
   const el = $(panelSel[name]);
+  releaseFocus?.(restoreFocus);
+  releaseFocus = null;
+  if (el) el.inert = true;
   el?.classList.remove('open');
   el?.setAttribute('aria-hidden', 'true');
   const ov = $(`[data-overlay="${name}"]`);
@@ -43,7 +49,7 @@ export function closePanel() {
     }, 320);
   }
   document.documentElement.classList.remove('lock');
-  $(`[data-open="${name}"]`)?.setAttribute('aria-expanded', 'false');
+  $$(`[data-open="${name}"]`).forEach((button) => button.setAttribute('aria-expanded', 'false'));
   window.dispatchEvent(new CustomEvent('blog:close', { detail: name }));
 }
 
@@ -99,7 +105,7 @@ function toggleTheme(e: MouseEvent) {
     })
     .catch(() => {});
   // 连点时前一次切换会提前结束，这时不能把下一次还要用的类去掉
-  t.finished.finally(() => {
+  t.finished.catch(() => {}).then(() => {
     if (switching !== t) return;
     switching = null;
     root.classList.remove('theme-switching', 'theme-window');
@@ -131,6 +137,9 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
+  if (e.isComposing) return;
+  // 图片预览自己处理 Esc，避免在灯箱后面打开另一层搜索并抢走焦点。
+  if ($('#lightbox')?.classList.contains('open')) return;
   const target = e.target as HTMLElement;
   const typing = target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -141,6 +150,7 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     openPanel('search');
   } else if (e.key === 'Escape' && current) {
+    e.preventDefault();
     closePanel();
   }
 });
@@ -188,11 +198,8 @@ window.addEventListener('scroll', onScroll, { passive: true });
 window.addEventListener('resize', onScroll, { passive: true });
 
 document.addEventListener('astro:before-swap', () => {
-  if (current) {
-    const name = current;
-    current = null;
-    window.dispatchEvent(new CustomEvent('blog:close', { detail: name }));
-  }
+  closePanel(false);
+  footerObserver?.disconnect();
 });
 
 /* 网站更新过（版本号对不上）：直接整页打开新页面，不把新版本拼到还在运行的旧脚本上，
@@ -229,6 +236,10 @@ function initNavIndicator() {
   requestAnimationFrame(() => (ind.style.transition = ''));
   $$<HTMLElement>('.nav-link', nav).forEach((a) => a.addEventListener('mouseenter', () => moveTo(a)));
   nav.addEventListener('mouseleave', () => moveTo(active()));
+  nav.addEventListener('focusin', (e) => moveTo((e.target as HTMLElement).closest('.nav-link')));
+  nav.addEventListener('focusout', (e) => {
+    if (!nav.contains(e.relatedTarget as Node | null)) moveTo(active());
+  });
 }
 
 /* 记录页脚实际高度，侧栏据此在底部预留空间（页脚换行、缩放、换页时自动更新） */
@@ -246,6 +257,14 @@ function trackFooterHeight() {
 }
 
 export function initUI() {
+  for (const [name, selector] of Object.entries(panelSel)) {
+    const panel = $(selector);
+    if (panel) panel.inert = !panel.classList.contains('open');
+    $$(`[data-open="${name}"]`).forEach((button) => {
+      button.setAttribute('aria-expanded', String(current === name));
+      button.setAttribute('aria-controls', selector.slice(1));
+    });
+  }
   initNavIndicator();
   trackFooterHeight();
   onScroll();

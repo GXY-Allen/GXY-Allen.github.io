@@ -35,6 +35,11 @@ jobs:
       - name: 构建站点
         run: npm run build
 
+      - name: 回归测试与站内链接检查
+        run: |
+          npm test
+          npm run check:site
+
       - name: 上传构建产物
         uses: actions/upload-pages-artifact@v5
         with:

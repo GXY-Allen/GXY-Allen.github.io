@@ -1,6 +1,7 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { getRemoteImageSize } from '../utils/remote-images.mjs';
 
 interface Props {
   src: ImageMetadata | string;
@@ -8,19 +9,36 @@ interface Props {
   width?: number;
   class?: string;
   eager?: boolean;
+  sizes?: string;
 }
-const { src, alt = '', width = 720, class: cls, eager = false } = Astro.props;
+const { src, alt = '', width = 720, class: cls, eager = false, sizes } = Astro.props;
 // 图床里的图片在构建时缩小并转成 WebP（与 astro.config.mjs 里的 image.domains 保持一致）
 const optimizable = typeof src === 'string' && /^https:\/\/raw\.githubusercontent\.com\//.test(src);
 const loading = eager ? 'eager' : 'lazy';
 // 首屏的封面同步解码：异步解码时，换页后头几帧封面那里是一块空白，几十毫秒后封面才冒出来
 const decoding = eager ? 'sync' : 'async';
+// 远程图不可用时保留原图链接，让暂时的图床故障不会阻断整个站点发布。
+let remoteImage;
+if (optimizable && typeof src === 'string') {
+  const dimensions = await getRemoteImageSize(src);
+  if (dimensions) {
+    const targetWidth = Math.min(width, dimensions.width);
+    try {
+      remoteImage = await getImage({
+        src, width: targetWidth, height: Math.round(targetWidth * dimensions.height / dimensions.width),
+        layout: 'constrained', sizes, loading, decoding,
+      });
+    } catch {
+      console.warn(`[图片优化跳过] ${src}`);
+    }
+  }
+}
 ---
 {
   typeof src !== 'string' ? (
-    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} loading={loading} decoding={decoding} />
-  ) : optimizable ? (
-    <Image src={src} alt={alt} class={cls} inferSize width={width} loading={loading} decoding={decoding} />
+    <Image src={src} alt={alt} class={cls} width={Math.min(width, src.width)} sizes={sizes} loading={loading} decoding={decoding} />
+  ) : remoteImage ? (
+    <img src={remoteImage.src} {...remoteImage.attributes} srcset={remoteImage.srcSet.attribute || undefined} alt={alt} class={cls} />
   ) : (
     <img src={src} alt={alt} class={cls} loading={loading} decoding={decoding} referrerpolicy="no-referrer" />
   )

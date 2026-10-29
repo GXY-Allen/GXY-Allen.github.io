@@ -17,15 +17,26 @@ interface Hit {
   excerpt: string;
 }
 
-let docsPromise: Promise<Doc[]> | null = null;
+interface SearchDoc extends Doc {
+  searchTitle: string;
+  searchMeta: string;
+  searchText: string;
+}
+
+let docsPromise: Promise<SearchDoc[]> | null = null;
 let indexFailed = false;
 
-function loadDocs(): Promise<Doc[]> {
+function loadDocs(): Promise<SearchDoc[]> {
   docsPromise ??= fetch('/search-index.json')
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((docs: Doc[]) => {
       indexFailed = false;
-      return docs;
+      return docs.map((doc) => ({
+        ...doc,
+        searchTitle: doc.title.toLowerCase(),
+        searchMeta: `${doc.desc} ${doc.tags}`.toLowerCase(),
+        searchText: doc.text.toLowerCase(),
+      }));
     })
     .catch(() => {
       indexFailed = true;
@@ -68,6 +79,7 @@ function count(hay: string, w: string): number {
 /** 退回方案：在标题里找 */
 function titleSearch(q: string): Hit[] {
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const re = new RegExp([...words].sort((a, b) => b.length - a.length).map(escRe).join('|'), 'gi');
   const seen = new Set<string>();
   const hits: Hit[] = [];
   for (const day of Object.values(activity()))
@@ -75,12 +87,10 @@ function titleSearch(q: string): Hit[] {
       const t = p.t.toLowerCase();
       if (!seen.has(p.u) && words.every((w) => t.includes(w))) {
         seen.add(p.u);
-        let title = esc(p.t);
-        for (const w of words) title = title.replace(new RegExp(escRe(esc(w)), 'gi'), (m) => `<mark>${m}</mark>`);
-        hits.push({ url: p.u, title, excerpt: '' });
+        hits.push({ url: p.u, title: highlight(p.t, re), excerpt: '' });
       }
     }
-  return hits;
+  return hits.slice(0, 12);
 }
 
 /** 空格分开的每个词都要出现（标题、摘要、分类标签或正文里都算），标题里出现的排在前面 */
@@ -95,9 +105,9 @@ async function runSearch(q: string): Promise<Hit[]> {
   const re = new RegExp(pattern, 'gi');
   const scored: { doc: Doc; score: number }[] = [];
   for (const doc of docs) {
-    const title = doc.title.toLowerCase();
-    const meta = `${doc.desc} ${doc.tags}`.toLowerCase();
-    const text = doc.text.toLowerCase();
+    const title = doc.searchTitle;
+    const meta = doc.searchMeta;
+    const text = doc.searchText;
     let score = 0;
     for (const w of words) {
       const s = (title.includes(w) ? 10 : 0) + (meta.includes(w) ? 3 : 0) + count(text, w);
@@ -127,6 +137,7 @@ function bind(root: HTMLElement) {
   let active = -1;
   let seq = 0;
   let timer = 0;
+  let renderedQuery = '';
 
   const setActive = (i: number) => {
     const items = $$('.search-item', out);
@@ -136,16 +147,21 @@ function bind(root: HTMLElement) {
     items[active].scrollIntoView({ block: 'nearest' });
   };
 
-  const doSearch = async () => {
+  const doSearch = async (openFirst = false) => {
     const q = input.value.trim();
     const my = ++seq;
+    active = -1;
     if (!q) {
+      renderedQuery = '';
       out.innerHTML = tip;
+      out.setAttribute('aria-busy', 'false');
       return;
     }
+    out.setAttribute('aria-busy', 'true');
     const hits = await runSearch(q);
-    if (my !== seq) return;
-    active = -1;
+    if (my !== seq || !root.isConnected) return;
+    renderedQuery = q;
+    out.setAttribute('aria-busy', 'false');
     if (!hits.length) {
       out.innerHTML = `<p class="search-tip">没有找到「${esc(q)}」相关的文章</p>`;
       return;
@@ -159,19 +175,38 @@ function bind(root: HTMLElement) {
       )
       .join('');
     if (indexFailed) out.insertAdjacentHTML('beforeend', '<p class="search-tip">（全文索引没能加载，只搜索了标题）</p>');
+    if (openFirst) navigate(hits[0].url);
   };
 
-  input.addEventListener('input', () => {
+  const schedule = (e: Event) => {
     clearTimeout(timer);
-    timer = window.setTimeout(doSearch, 160);
-  });
+    ++seq; // 输入一变就让在途请求失效，不等防抖结束。
+    active = -1;
+    renderedQuery = '';
+    // 旧结果留到新结果出来再整体换掉（每敲一个字都清空，列表会一闪一闪）；这期间方向键和 Enter 不作用在旧结果上
+    if (input.value.trim()) $$('.search-item.active', out).forEach((el) => el.classList.remove('active'));
+    else out.innerHTML = tip;
+    if ((e as InputEvent).isComposing) return;
+    timer = window.setTimeout(() => doSearch(), 160);
+  };
+  input.addEventListener('input', schedule);
+  input.addEventListener('compositionend', schedule);
   input.addEventListener('keydown', (e) => {
+    if (e.isComposing || e.keyCode === 229) return;
+    if (renderedQuery !== input.value.trim()) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(timer);
+        void doSearch(true);
+      }
+      return;
+    }
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActive(active + 1);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActive(active - 1);
+      setActive(active < 0 ? -1 : active - 1);
     } else if (e.key === 'Enter') {
       const items = $$<HTMLAnchorElement>('.search-item', out);
       const target = items[active] ?? items[0];
@@ -181,6 +216,19 @@ function bind(root: HTMLElement) {
       }
     }
   });
+  const cancelPending = () => {
+    clearTimeout(timer);
+    ++seq;
+    out.setAttribute('aria-busy', 'false');
+  };
+  const onClose = (e: Event) => {
+    if (root.id === 'search-modal' && (e as CustomEvent<string>).detail === 'search') cancelPending();
+  };
+  window.addEventListener('blog:close', onClose);
+  document.addEventListener('astro:before-swap', () => {
+    cancelPending();
+    window.removeEventListener('blog:close', onClose);
+  }, { once: true });
 }
 
 window.addEventListener('blog:open', ((e: CustomEvent<string>) => {
@@ -189,7 +237,8 @@ window.addEventListener('blog:open', ((e: CustomEvent<string>) => {
   if (!modal) return;
   bind(modal);
   loadDocs();
-  setTimeout(() => $<HTMLInputElement>('.search-input', modal)?.focus(), 60);
+  const input = $<HTMLInputElement>('.search-input', modal);
+  if (input?.value.trim()) input.dispatchEvent(new Event('input'));
 }) as EventListener);
 
 export function initSearch() {

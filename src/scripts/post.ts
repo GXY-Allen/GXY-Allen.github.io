@@ -1,5 +1,5 @@
 /** 文章页：代码块、标题锚点、目录高亮、图片灯箱、Mermaid、复制链接 */
-import { $, $$, copyText, motionOn, toast } from './util';
+import { $, $$, copyText, motionOn, toast, trapFocus } from './util';
 import { themeSettled } from './ui';
 
 /* ---------------- 代码块 ---------------- */
@@ -56,9 +56,14 @@ function updateToc(force = false) {
   if (!headings.length) return;
   const offset = 110;
   let idx = -1;
-  for (let i = 0; i < headings.length; i++) {
-    if (headings[i].getBoundingClientRect().top - offset <= 0) idx = i;
-    else break;
+  let lo = 0;
+  let hi = headings.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >>> 1;
+    if (headings[mid].getBoundingClientRect().top <= offset) {
+      idx = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
   }
   const activeId = idx >= 0 ? headings[idx].id : '';
   if (!force && activeId === lastActive) return;
@@ -94,11 +99,15 @@ window.addEventListener('blog:scroll', ((e: CustomEvent<{ p: number }>) => {
 function initToc() {
   headings = $$<HTMLElement>('.prose :is(h2, h3, h4)[id]');
   lastActive = null;
+  lastPct = '';
   updateToc(true);
 }
 
 /* ---------------- 图片灯箱 ---------------- */
 let lbSource: HTMLImageElement | null = null;
+let lbAnimation: Animation | null = null;
+let releaseLightboxFocus: ReturnType<typeof trapFocus> | null = null;
+let lightboxSequence = 0;
 
 function flip(from: DOMRect, to: DOMRect) {
   const s = from.width / to.width;
@@ -111,18 +120,27 @@ function openLightbox(img: HTMLImageElement) {
   const box = $('#lightbox');
   const big = $<HTMLImageElement>('.lightbox-img', box ?? document);
   if (!box || !big) return;
+  const sequence = ++lightboxSequence;
+  lbAnimation?.cancel();
+  lbAnimation = null;
+  releaseLightboxFocus?.(false);
   lbSource = img;
+  big.onload = null;
   big.src = img.currentSrc || img.src;
   big.alt = img.alt;
   $('.lightbox-caption', box)!.textContent = img.alt || '';
   box.classList.add('open');
+  box.inert = false;
   box.setAttribute('aria-hidden', 'false');
+  // 不加 html.lock：锁滚动会去掉滚动条，整页变宽重排，点开图片时页面横跳一下
+  releaseLightboxFocus = trapFocus(box);
   if (!motionOn()) return;
   const animate = () => {
+    if (sequence !== lightboxSequence || !box.isConnected || !box.classList.contains('open')) return;
     const from = img.getBoundingClientRect();
     const to = big.getBoundingClientRect();
     if (!to.width) return;
-    big.animate([{ transform: flip(from, to), borderRadius: '12px' }, { transform: 'none' }], {
+    lbAnimation = big.animate([{ transform: flip(from, to), borderRadius: '12px' }, { transform: 'none' }], {
       duration: 420,
       easing: 'cubic-bezier(.22,1,.36,1)',
     });
@@ -131,23 +149,28 @@ function openLightbox(img: HTMLImageElement) {
   else big.onload = animate;
 }
 
-function closeLightbox() {
+function closeLightbox(restoreFocus = true, animate = true) {
   const box = $('#lightbox');
   const big = $<HTMLImageElement>('.lightbox-img', box ?? document);
   if (!box?.classList.contains('open') || !big) return;
-  const done = () => {
-    box.classList.remove('open');
-    box.setAttribute('aria-hidden', 'true');
-  };
-  if (motionOn() && lbSource && document.body.contains(lbSource)) {
+  ++lightboxSequence;
+  big.onload = null;
+  lbAnimation?.cancel();
+  lbAnimation = null;
+  releaseLightboxFocus?.(restoreFocus);
+  releaseLightboxFocus = null;
+  box.classList.remove('open');
+  box.setAttribute('aria-hidden', 'true');
+  box.inert = true;
+  if (animate && motionOn() && lbSource?.isConnected && big.naturalWidth) {
     const from = lbSource.getBoundingClientRect();
     const to = big.getBoundingClientRect();
-    box.classList.remove('open');
-    big.animate([{ transform: 'none' }, { transform: flip(from, to) }], {
+    if (from.width && to.width) lbAnimation = big.animate([{ transform: 'none' }, { transform: flip(from, to) }], {
       duration: 320,
       easing: 'cubic-bezier(.22,1,.36,1)',
-    }).onfinish = done;
-  } else done();
+      fill: 'forwards',
+    });
+  }
   lbSource = null;
 }
 
@@ -155,9 +178,21 @@ document.addEventListener('click', (e) => {
   if ((e.target as Element).closest('#lightbox')) closeLightbox();
 });
 document.addEventListener('keydown', (e) => {
+  if (e.isComposing) return;
+  const target = e.target as HTMLElement;
+  if ((e.key === 'Enter' || e.key === ' ') && target.matches('.prose img[role="button"]')) {
+    e.preventDefault();
+    openLightbox(target as HTMLImageElement);
+  }
   if (e.key === 'Escape') closeLightbox();
 });
-document.addEventListener('astro:before-swap', closeLightbox);
+document.addEventListener('astro:before-swap', () => {
+  closeLightbox(false, false);
+  lbAnimation?.cancel();
+  lbAnimation = null;
+  headings = [];
+  mermaidIO?.disconnect();
+});
 
 /* ---------------- Mermaid ---------------- */
 const MERMAID = 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
@@ -172,6 +207,8 @@ function renderMermaid(blocks: HTMLElement[]) {
     if (!blocks.length) return;
     try {
       mermaidMod ??= (await import(/* @vite-ignore */ MERMAID)).default;
+      blocks = blocks.filter((b) => b.isConnected);
+      if (!blocks.length) return;
       const dark = document.documentElement.dataset.theme === 'dark';
       mermaidMod.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default', securityLevel: 'strict', fontFamily: 'inherit' });
       for (const b of blocks) {
@@ -191,12 +228,16 @@ function afterPageEnter() {
   return new Promise<void>((resolve) => {
     const main = $('.main');
     if (!main?.classList.contains('page-enter')) return resolve();
-    main.addEventListener('animationend', function done(e) {
-      if (e.target !== main) return;
+    const done = (e?: Event) => {
+      if (e && e.target !== main) return;
       main.removeEventListener('animationend', done);
+      main.removeEventListener('animationcancel', done);
+      clearTimeout(timer);
       resolve();
-    });
-    setTimeout(resolve, 800);
+    };
+    const timer = window.setTimeout(done, 800);
+    main.addEventListener('animationend', done);
+    main.addEventListener('animationcancel', done);
   });
 }
 
@@ -208,6 +249,10 @@ function observeMermaid() {
   const blocks = $$<HTMLElement>('pre.mermaid');
   if (!blocks.length) return;
   const entered = afterPageEnter();
+  if (!('IntersectionObserver' in window)) {
+    entered.then(() => renderMermaid(blocks));
+    return;
+  }
   mermaidIO = new IntersectionObserver(
     (entries) => {
       const near = entries.filter((en) => en.isIntersecting).map((en) => en.target as HTMLElement);
@@ -231,9 +276,17 @@ window.addEventListener('blog:settings', () => {
 });
 
 export function initPost() {
+  initToc();
+  mermaidIO?.disconnect();
   if (!$('.prose')) return;
   initAnchors();
-  initToc();
+  $$<HTMLImageElement>('.prose img').forEach((img) => {
+    if (img.closest('a')) return;
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-haspopup', 'dialog');
+    img.setAttribute('aria-label', img.alt ? `放大图片：${img.alt}` : '放大图片');
+  });
   lastTheme = document.documentElement.dataset.theme ?? '';
   observeMermaid();
 }

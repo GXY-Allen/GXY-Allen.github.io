@@ -6,17 +6,28 @@
  * 会生成 src/content/posts/<分类>/<标题>/index.md 和一个 images 文件夹
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative, resolve } from 'node:path';
 
 const [title, category = ''] = process.argv.slice(2);
-if (!title) {
+if (!title?.trim()) {
   console.log('用法：npm run new "文章标题" [分类/子分类]');
   console.log('例如：npm run new "CSS 笔记" 技术/前端');
   process.exit(1);
 }
 
-const safe = (s) => s.replace(/[\\/:*?"<>|#%]/g, '-').trim();
-const dir = join('src', 'content', 'posts', ...category.split('/').filter(Boolean).map(safe), safe(title));
+const safe = (s) => s.replace(/[\u0000-\u001f\\/:*?"<>|#%]/g, '-').trim().replace(/[. ]+$/, '');
+const segments = [...category.replace(/\\/g, '/').split('/').filter(Boolean), title].map(safe);
+if (segments.some((part) => !part || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))) {
+  console.error('✗ 标题和分类必须包含有效名称，不能使用 .、.. 或 Windows 保留文件名');
+  process.exit(1);
+}
+const postsRoot = resolve('src', 'content', 'posts');
+const dir = resolve(postsRoot, ...segments);
+const relativeDir = relative(postsRoot, dir);
+if (!relativeDir || relativeDir === '..' || relativeDir.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`) || isAbsolute(relativeDir)) {
+  console.error('✗ 文章必须创建在 src/content/posts 目录内');
+  process.exit(1);
+}
 if (existsSync(dir)) {
   console.error(`✗ 已经存在：${dir}`);
   process.exit(1);
@@ -28,7 +39,7 @@ const file = join(dir, 'index.md');
 writeFileSync(
   file,
   `---
-title: ${title}
+title: ${JSON.stringify(title.trim())}
 date: ${now}
 tags: []
 # description: 一句话摘要（不写就自动截取正文）

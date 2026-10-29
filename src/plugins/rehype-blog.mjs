@@ -17,7 +17,7 @@ const LANG_NAMES = { js: 'javascript', ts: 'typescript', sh: 'shell', py: 'pytho
 const COLLAPSE_LINES = 30;
 
 export default function rehypeBlog() {
-  return (tree) => {
+  return (tree, file) => {
     let firstImage = true;
     visit(tree, 'element', (node, index, parent) => {
       if (!parent || index == null) return;
@@ -69,6 +69,14 @@ export default function rehypeBlog() {
         }
       }
       if (node.tagName === 'img') {
+        if (node.properties.dataRemoteFallback) {
+          let src = String(node.properties.src);
+          try { src = decodeURI(src); } catch {}
+          if (file?.data?.astro?.remoteImagePaths) {
+            file.data.astro.remoteImagePaths = file.data.astro.remoteImagePaths.filter((url) => url !== src);
+          }
+          delete node.properties.dataRemoteFallback;
+        }
         // 第一张图可能就在首屏：同步解码，换页后第一帧就带着它，不会先空一块（同 Cover.astro）
         if (firstImage) {
           node.properties.loading = 'eager';
@@ -80,7 +88,6 @@ export default function rehypeBlog() {
       }
       if (node.tagName === 'table') {
         parent.children[index] = el('div', { className: ['table-wrap'] }, [node]);
-        return SKIP;
       }
     });
   };

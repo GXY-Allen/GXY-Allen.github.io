@@ -6,10 +6,14 @@ import rehypeKatex from 'rehype-katex';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 
-// src/plugins 里文件内容的指纹：插件一改，指纹就变，Astro 会自动清掉旧的文章渲染缓存
+// 插件及共用图片工具的指纹：改动后清掉旧的文章渲染缓存。
 const pluginsDir = new URL('./src/plugins/', import.meta.url);
+const pluginFiles = [
+  ...readdirSync(pluginsDir).sort().map((f) => new URL(f, pluginsDir)),
+  new URL('./src/utils/remote-images.mjs', import.meta.url),
+];
 const pluginsHash = createHash('sha1')
-  .update(readdirSync(pluginsDir).sort().map((f) => f + readFileSync(new URL(f, pluginsDir), 'utf8')).join(''))
+  .update(pluginFiles.map((file) => file.pathname + readFileSync(file, 'utf8')).join(''))
   .digest('hex')
   .slice(0, 12);
 
@@ -22,7 +26,7 @@ const watchPlugins = {
   name: 'watch-plugins',
   hooks: {
     'astro:config:setup': ({ addWatchFile }) => {
-      for (const f of readdirSync(pluginsDir)) addWatchFile(new URL(f, pluginsDir));
+      for (const file of pluginFiles) addWatchFile(file);
     },
   },
 };
@@ -41,7 +45,7 @@ export default defineConfig({
       wrap: false,
     },
     processor: unified({
-      remarkPlugins: [remarkMath, [remarkBlog, { cacheKey: pluginsHash }]],
+      remarkPlugins: [remarkMath, [remarkBlog, { cacheKey: pluginsHash, imageDomains: ['raw.githubusercontent.com'] }]],
       rehypePlugins: [[rehypeKatex, { strict: false, throwOnError: false }], [rehypeBlog, { cacheKey: pluginsHash }]],
       remarkRehype: {
         footnoteLabel: '脚注',

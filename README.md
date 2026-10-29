@@ -8,7 +8,7 @@
 
 ## 第一次使用
 
-1. 安装 [Node.js](https://nodejs.org)（22 或更新版本）
+1. 安装 [Node.js](https://nodejs.org)（22.12.0 或更新版本）
 2. 仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**（只需要设置一次）
 3. 双击 `预览.bat`，第一次会自动安装依赖，然后浏览器打开 <http://localhost:4321>
 
@@ -26,6 +26,8 @@ npm run dev                          # 本地预览
 npm run new "文章标题" 技术/前端      # 新建文章模板
 npm run publish                      # 一键发布
 npm run build                        # 只构建，不发布
+npm run check:site                   # 构建后检查本地链接、图片和搜索索引
+npm test                             # 运行故障回归测试
 ```
 
 ### 文章开头信息（全部可选）

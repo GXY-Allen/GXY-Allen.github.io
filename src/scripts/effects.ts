@@ -1,5 +1,5 @@
 /** 视觉特效：滚动显现、卡片 3D 倾斜、横幅视差、打字机 */
-import { $, $$, finePointer, motionOn } from './util';
+import { $, $$, finePointer, motionOn, rafThrottle } from './util';
 import { layoutSidebar } from './sidebar';
 import type { TransitionBeforePreparationEvent } from 'astro:transitions/client';
 
@@ -7,7 +7,10 @@ let io: IntersectionObserver | null = null;
 
 function initReveal() {
   io?.disconnect();
-  if (!motionOn() || !('IntersectionObserver' in window)) return;
+  if (!motionOn() || !('IntersectionObserver' in window)) {
+    $$('.will-reveal').forEach((el) => el.classList.add('revealed'));
+    return;
+  }
   const candidates = [...$$('[data-reveal]:not(.revealed)'), ...$$('.prose > *')];
   // 先一次性读取位置（避免读写交替导致反复重排），首屏内的元素直接显示。
   // 换页时正文栏正从下方滑入，要扣掉这段位移，否则首屏底部的内容会被当成在屏幕外藏起来
@@ -37,8 +40,8 @@ function initTilt() {
   for (const el of $$('[data-tilt]')) {
     if (el.dataset.tiltBound) continue;
     el.dataset.tiltBound = '1';
-    el.addEventListener('pointermove', (e) => {
-      if (!motionOn()) return;
+    el.addEventListener('pointermove', rafThrottle((e: PointerEvent) => {
+      if (!motionOn() || !el.isConnected || !el.matches(':hover')) return;
       const r = el.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width;
       const y = (e.clientY - r.top) / r.height;
@@ -48,7 +51,7 @@ function initTilt() {
       el.style.setProperty('--ty', `${((0.5 - y) * amp).toFixed(2)}deg`);
       el.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
       el.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
-    });
+    }));
     el.addEventListener('pointerleave', () => {
       el.classList.remove('tilting');
       el.style.setProperty('--tx', '0deg');
@@ -77,7 +80,9 @@ function initTyped() {
   try {
     list = JSON.parse(box.dataset.slogans || '[]');
   } catch {}
-  if (!list.length || !motionOn()) return;
+  if (!Array.isArray(list) || !list.length || !list.every((s) => typeof s === 'string')) return;
+  out.textContent = list[0];
+  if (!motionOn() || document.hidden) return;
   let i = 0;
   let pos = list[0].length;
   let deleting = true;
@@ -109,6 +114,27 @@ export function initEffects() {
   initTilt();
   initTyped();
 }
+
+let lastMotion = motionOn();
+window.addEventListener('blog:settings', () => {
+  const enabled = motionOn();
+  if (enabled === lastMotion) return;
+  lastMotion = enabled;
+  initReveal();
+  initTyped();
+  if (!enabled) {
+    $$('.tilting').forEach((el) => {
+      el.classList.remove('tilting');
+      el.style.setProperty('--tx', '0deg');
+      el.style.setProperty('--ty', '0deg');
+    });
+    $('.hero-bg')?.style.removeProperty('--parallax');
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) clearTimeout(typedTimer);
+  else initTyped();
+});
 
 /* ---------------- 换页过渡 ----------------
    不走浏览器的 View Transition（见 BaseLayout.astro）：旧正文上移、卡片淡下去一点后直接换成新页面，新正文从下方滑入、卡片淡回来（animations.css）。
@@ -193,6 +219,8 @@ const sameBox = (a: DOMRect, b: DOMRect) =>
   Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.width - b.width) < 1 && Math.abs(a.height - b.height) < 1;
 
 document.addEventListener('astro:before-swap', () => {
+  clearTimeout(typedTimer);
+  io?.disconnect();
   oldCards = sideCards();
 });
 

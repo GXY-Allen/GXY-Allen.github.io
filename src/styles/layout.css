@@ -336,7 +336,8 @@
     transform 0.35s var(--ease-spring),
     opacity 0.3s,
     box-shadow 0.25s,
-    color 0.2s;
+    color 0.2s,
+    visibility 0.35s;
 }
 .fab:hover {
   transform: translateY(-0.1875rem) scale(1.06);
@@ -347,11 +348,14 @@
   transform: scale(0.92);
 }
 .fab-top {
+  /* 隐藏时 Tab 也跳过它；visibility 跟着淡出一起过渡（见 .fab），否则按钮会直接消失 */
+  visibility: hidden;
   opacity: 0;
   transform: translateY(1rem) scale(0.6);
   pointer-events: none;
 }
 .fab-top.show {
+  visibility: visible;
   opacity: 1;
   transform: none;
   pointer-events: auto;

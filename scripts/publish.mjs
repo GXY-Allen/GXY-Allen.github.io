@@ -5,27 +5,31 @@
  *   npm run publish -- --skip-build   跳过本地构建检查
  *   npm run publish -- -m "自定义说明"
  */
-import { execSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
 const skipBuild = args.includes('--skip-build');
 const mIdx = args.indexOf('-m');
 const customMsg = mIdx >= 0 ? args[mIdx + 1] : '';
 
-const sh = (cmd) => execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
-const run = (cmd, cmdArgs) => spawnSync(cmd, cmdArgs, { stdio: 'inherit', shell: process.platform === 'win32' }).status === 0;
+const git = (cmdArgs) => execFileSync('git', cmdArgs, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+// Git 参数直接传给进程，避免 Windows 把标题中的 &、引号等解释成命令。
+const run = (cmd, cmdArgs) => spawnSync(cmd, cmdArgs, { stdio: 'inherit' }).status === 0;
+const build = () => process.env.npm_execpath
+  ? run(process.execPath, [process.env.npm_execpath, 'run', 'build'])
+  : spawnSync('npm run build', { stdio: 'inherit', shell: true }).status === 0;
 const fail = (msg) => {
   console.error(`\n✗ ${msg}`);
   process.exit(1);
 };
 
 try {
-  sh('git rev-parse --is-inside-work-tree');
+  git(['rev-parse', '--is-inside-work-tree']);
 } catch {
   fail('当前目录不是 git 仓库');
 }
 
-const status = sh('git -c core.quotepath=off status --porcelain -uall');
+const status = git(['status', '--porcelain', '-z', '-uall']);
 if (!status) {
   console.log('✓ 没有需要发布的改动');
   process.exit(0);
@@ -46,11 +50,14 @@ const postName = (file) => {
   return parts[parts.length - 1];
 };
 
-for (const line of status.split('\n')) {
-  const code = line.slice(0, 2);
-  let file = line.slice(3).trim();
-  if (file.includes(' -> ')) file = file.split(' -> ')[1];
-  file = file.replace(/^"|"$/g, '');
+const changes = [];
+const records = status.split('\0').filter(Boolean);
+for (let i = 0; i < records.length; i++) {
+  const code = records[i].slice(0, 2);
+  const file = records[i].slice(3);
+  // -z 输出重命名目标在前、旧路径在后；路径本身允许空格、引号或换行。
+  const previous = /[RC]/.test(code) ? records[++i] : undefined;
+  changes.push(`${code} ${previous ? `${previous} → ` : ''}${file}`);
   if (file.startsWith(POSTS) && /\.md$/i.test(file) && !/\/_/.test(file)) {
     const name = postName(file);
     if (code.includes('?') || code.includes('A')) added.add(name);
@@ -70,13 +77,14 @@ if (others && !parts.length) parts.push('更新站点');
 const message = customMsg || parts.join('；');
 
 console.log('\n将要发布的改动：');
-console.log(status.split('\n').map((l) => '  ' + l).join('\n'));
+console.log(changes.map((l) => '  ' + l).join('\n'));
 console.log(`\n提交说明：${message}\n`);
 
 /* ---------- 构建检查 ---------- */
 if (!skipBuild) {
   console.log('▶ 正在本地构建检查（大约十几秒）…');
-  if (!run('npm', ['run', 'build'])) fail('构建失败，请根据上面的错误信息修改后再发布（文章没有被提交）');
+  if (!build()) fail('构建失败，请根据上面的错误信息修改后再发布（文章没有被提交）');
+  if (!run(process.execPath, ['scripts/check-site.mjs'])) fail('站内链接检查失败，请修复后再发布（文章没有被提交）');
   console.log('✓ 构建通过\n');
 }
 
@@ -91,7 +99,7 @@ if (!run('git', ['push'])) fail('推送失败，请检查网络或 GitHub 登录
 
 let repo = '';
 try {
-  repo = sh('git remote get-url origin').replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '');
+  repo = git(['remote', 'get-url', 'origin']).trim().replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '');
 } catch {}
 console.log('\n✓ 发布成功！GitHub 正在自动部署，一两分钟后刷新网站即可看到。');
 if (repo) console.log(`  部署进度：${repo}/actions`);

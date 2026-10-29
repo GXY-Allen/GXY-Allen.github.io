@@ -3,9 +3,12 @@ import { SITE } from '../site.config';
 import Icon from './Icon.astro';
 
 const path = Astro.url.pathname;
+const isActive = (href: string) => href === '/'
+  ? path === '/' || /^\/page\/\d+\/?$/.test(path) || path.startsWith('/posts/')
+  : path === href.replace(/\/$/, '') || path.startsWith(href);
 ---
 <div class="overlay" data-overlay="drawer" hidden></div>
-<aside class="drawer" id="drawer" aria-label="菜单" aria-hidden="true">
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="菜单" aria-hidden="true" tabindex="-1" inert>
   <div class="drawer-head">
     <span class="drawer-title">{SITE.title}</span>
     <button class="icon-btn" data-close aria-label="关闭菜单"><Icon name="x" size={20} /></button>
@@ -13,10 +16,10 @@ const path = Astro.url.pathname;
   <div class="drawer-body">
     <!-- 手机端：侧栏的个人卡片会被脚本移到这里（不重复渲染，减少页面体积） -->
     <div class="drawer-slot-top"></div>
-    <nav class="drawer-nav widget glass">
+    <nav class="drawer-nav widget glass" aria-label="主导航">
       {
         SITE.nav.map((item) => (
-          <a href={item.href} class:list={['drawer-link', { active: item.href === '/' ? path === '/' : path.startsWith(item.href) }]} data-ripple>
+          <a href={item.href} class:list={['drawer-link', { active: isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined} data-ripple>
             <Icon name={item.icon} size={18} />
             <span>{item.name}</span>
             <Icon name="chevron-right" size={16} class="drawer-arrow" />

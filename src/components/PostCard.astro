@@ -17,7 +17,7 @@ const flip = index % 2 === 1;
   {
     post.cover && (
       <a href={post.url} class="post-cover" tabindex="-1" aria-hidden="true">
-        <Cover src={post.cover} alt="" width={640} eager={index < 2} />
+        <Cover src={post.cover} alt="" width={640} sizes="(max-width: 720px) 96vw, 21.25rem" eager={index < 2} />
       </a>
     )
   }

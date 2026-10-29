@@ -6,11 +6,8 @@ import { postIdFromPath } from './utils/paths';
 /** 允许 `tags: a` 或 `tags: [a, b]` 或 `tags: a, b` 几种写法 */
 const stringList = z.preprocess((v) => {
   if (v == null || v === '') return [];
-  if (Array.isArray(v)) return v.map(String);
-  return String(v)
-    .split(/[,，、]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const values = Array.isArray(v) ? v : String(v).split(/[,，、]/);
+  return [...new Set(values.map((s) => String(s).trim()).filter(Boolean))];
 }, z.array(z.string()));
 
 /** 没写时区的日期按北京时间处理，例如 2025-11-20 或 2025-11-20 16:45 */

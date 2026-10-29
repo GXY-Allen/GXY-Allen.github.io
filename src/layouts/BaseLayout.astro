@@ -34,6 +34,7 @@ interface Props {
   article?: { published: Date; modified: Date; tags: string[] };
   /** 只有这个页面需要的样式表（例如公式） */
   styles?: string[];
+  noindex?: boolean;
 }
 
 const {
@@ -45,6 +46,7 @@ const {
   hasToc = false,
   article,
   styles = [],
+  noindex = false,
 } = Astro.props;
 
 const fullTitle = title ? `${title} | ${SITE.title}` : SITE.title;
@@ -77,10 +79,15 @@ const backgrounds = SITE.backgrounds;
     <meta name="author" content={SITE.author.name} />
     <meta name="generator" content={Astro.generator} />
     <meta name="build" content={BUILD_ID} />
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    {Astro.url.pathname === '/' && SITE.banner && <>
+      <link rel="preload" as="image" href={SITE.bannerSmall || SITE.banner} media="(width < 1100px)" />
+      <link rel="preload" as="image" href={SITE.banner} media="(width >= 1100px)" />
+    </>}
     {styles.map((href) => <link rel="stylesheet" href={href} />)}
     <meta name="theme-color" content={SITE.appearance.primary} />
     <meta property="og:type" content={article ? 'article' : 'website'} />
@@ -100,16 +107,36 @@ const backgrounds = SITE.backgrounds;
         var KEY = 'blog-settings';
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var D = Object.assign({ motion: !reduce }, settingsDefaults);
-        function stored() {
-          try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
+        var memory = load();
+        function load() {
+          try {
+            var value = JSON.parse(localStorage.getItem(KEY) || '{}');
+            return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+          } catch (e) { return {}; }
         }
-        function read() { return Object.assign({}, D, stored()); }
+        function number(value, fallback, min, max) {
+          return typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+        }
+        function read() {
+          var s = memory;
+          return {
+            mode: ['auto', 'light', 'dark'].includes(s.mode) ? s.mode : D.mode,
+            primary: typeof s.primary === 'string' && /^#[0-9a-f]{6}$/i.test(s.primary) ? s.primary : D.primary,
+            bg: typeof s.bg === 'string' && (s.bg === 'custom' || s.bg === 'upload' || backgrounds.some(function (b) { return b.id === s.bg; })) ? s.bg : D.bg,
+            bgCustom: typeof s.bgCustom === 'string' && /^(https?:\/\/|\/)/i.test(s.bgCustom) && !/[\u0000-\u001f\u007f\\]/.test(s.bgCustom) ? s.bgCustom : '',
+            bgBlur: number(s.bgBlur, D.bgBlur, 0, 24),
+            cardOpacity: number(s.cardOpacity, D.cardOpacity, 0.35, 1),
+            fontSize: number(s.fontSize, D.fontSize, 14, 22),
+            motion: typeof s.motion === 'boolean' ? s.motion : D.motion,
+          };
+        }
         function bgOf(s) {
           if (s.bg === 'custom' && s.bgCustom) return { kind: 'image', css: 'url("' + s.bgCustom.replace(/"/g, '%22') + '")' };
           if (s.bg === 'upload') {
             try { var d = localStorage.getItem('blog-bg-upload'); if (d) return { kind: 'image', css: 'url("' + d + '")' }; } catch (e) {}
           }
           var p = backgrounds.find(function (b) { return b.id === s.bg; }) || backgrounds.find(function (b) { return b.id === D.bg; }) || backgrounds[0];
+          if (!p) return { kind: 'color', css: '#eef1f6' };
           var src = p.small && window.innerWidth < 1280 ? p.small : p.value;
           return { kind: p.type, css: p.type === 'image' ? 'url("' + src + '")' : p.value };
         }
@@ -139,12 +166,18 @@ const backgrounds = SITE.backgrounds;
           read: read,
           apply: apply,
           save: function (patch) {
-            var s = Object.assign(stored(), patch);
-            try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
+            memory = Object.assign({}, memory, patch);
+            var settings = read();
+            var persisted = {};
+            Object.keys(settings).forEach(function (key) {
+              if (Object.prototype.hasOwnProperty.call(memory, key)) persisted[key] = settings[key];
+            });
+            try { localStorage.setItem(KEY, JSON.stringify(persisted)); } catch (e) {}
             apply();
             window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
           },
           reset: function () {
+            memory = {};
             try { localStorage.removeItem(KEY); localStorage.removeItem('blog-bg-upload'); } catch (e) {}
             apply();
             window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
@@ -170,6 +203,18 @@ const backgrounds = SITE.backgrounds;
           });
           document.addEventListener('astro:after-swap', apply);
           window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+          window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function (e) {
+            D.motion = !e.matches;
+            apply();
+            window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
+          });
+          window.addEventListener('storage', function (e) {
+            if (e.key === KEY || e.key === 'blog-bg-upload' || e.key === null) {
+              memory = load();
+              apply();
+              window.dispatchEvent(new CustomEvent('blog:settings', { detail: read() }));
+            }
+          });
         }
       })();
     </script>
@@ -191,7 +236,7 @@ const backgrounds = SITE.backgrounds;
         </div>
       </aside>
 
-      <main id="main" class="main">
+      <main id="main" class="main" tabindex="-1">
         <slot />
       </main>
 

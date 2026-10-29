@@ -6,7 +6,8 @@ import { $, $$, activity, ymd, type DayActivity } from './util';
 const CAT_KEY = 'blog-cat-open';
 const readOpen = (): string[] => {
   try {
-    return JSON.parse(localStorage.getItem(CAT_KEY) || '[]');
+    const value: unknown = JSON.parse(localStorage.getItem(CAT_KEY) || '[]');
+    return Array.isArray(value) ? value.filter((key): key is string => typeof key === 'string') : [];
   } catch {
     return [];
   }
@@ -22,6 +23,8 @@ document.addEventListener('click', (e) => {
   // 两份分类树（侧栏 + 抽屉）同步
   $$(`.cat-item[data-key="${CSS.escape(key)}"]`).forEach((el) => {
     el.classList.toggle('open', open);
+    const children = $<HTMLElement>(':scope > .cat-children', el);
+    if (children) children.inert = !open;
     el.querySelector(':scope > .cat-row .cat-toggle')?.setAttribute('aria-expanded', String(open));
   });
   const set = new Set(readOpen());
@@ -35,6 +38,8 @@ function initCategoryTree(root: ParentNode = document) {
   for (const key of readOpen()) {
     $$(`.cat-item.has-children[data-key="${CSS.escape(key)}"]`, root).forEach((el) => {
       el.classList.add('open');
+      const children = $<HTMLElement>(':scope > .cat-children', el);
+      if (children) children.inert = false;
       el.querySelector(':scope > .cat-row .cat-toggle')?.setAttribute('aria-expanded', 'true');
     });
   }
@@ -147,6 +152,9 @@ function renderHeatmapIn(box: HTMLElement) {
   const act = activity();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const renderKey = `${weeks}:${ymd(today)}`;
+  if (grid.dataset.renderKey === renderKey) return;
+  grid.dataset.renderKey = renderKey;
   const dow = (today.getDay() + 6) % 7;
   const start = new Date(today);
   start.setDate(today.getDate() - dow - (weeks - 1) * 7);
@@ -173,7 +181,9 @@ function renderHeatmapIn(box: HTMLElement) {
         total += a.n;
         words += a.w;
       }
-      cells.push(`<i class="hm-cell" data-l="${level(a)}" data-day="${key}"></i>`);
+      cells.push(a
+        ? `<button type="button" class="hm-cell" data-l="${level(a)}" data-day="${key}" aria-label="${key}，${a.n} 篇文章"></button>`
+        : `<i class="hm-cell" data-l="0" data-day="${key}" aria-hidden="true"></i>`);
     }
   }
   grid.innerHTML = cells.join('');
@@ -182,8 +192,8 @@ function renderHeatmapIn(box: HTMLElement) {
   if (sum) sum.textContent = `近 ${weeks} 周 · ${total} 篇 · ${words.toLocaleString()} 字`;
 }
 
-document.addEventListener('pointerover', (e) => {
-  const cell = (e.target as Element).closest<HTMLElement>('.hm-cell[data-day]');
+function showTip(target: Element) {
+  const cell = target.closest<HTMLElement>('.hm-cell[data-day]');
   if (!cell) return hideTip();
   const key = cell.dataset.day!;
   const a = activity()[key];
@@ -198,8 +208,11 @@ document.addEventListener('pointerover', (e) => {
   tipEl.style.left = `${Math.min(innerWidth - 140, Math.max(140, r.left + r.width / 2))}px`;
   tipEl.style.top = `${r.top}px`;
   document.body.appendChild(tipEl);
-});
-document.addEventListener('scroll', hideTip, { passive: true });
+}
+document.addEventListener('pointerover', (e) => showTip(e.target as Element));
+document.addEventListener('focusin', (e) => showTip(e.target as Element));
+document.addEventListener('focusout', hideTip);
+document.addEventListener('scroll', hideTip, { passive: true, capture: true });
 
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
@@ -216,7 +229,10 @@ function initSince() {
 }
 
 /** 由脚本渲染、决定卡片高度的部分：分类树展开状态、日历、热力图（换页过渡测量卡片前也要先调用） */
+let layoutBody: HTMLElement | null = null;
 export function layoutSidebar() {
+  if (layoutBody === document.body) return;
+  layoutBody = document.body;
   initCategoryTree();
   const now = new Date();
   if (!calYear) {

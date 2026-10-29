@@ -36,6 +36,7 @@ export function toast(msg: string) {
   $$('.toast').forEach((t) => t.remove());
   const t = document.createElement('div');
   t.className = 'toast';
+  t.setAttribute('role', 'status');
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2300);
@@ -50,11 +51,56 @@ export async function copyText(text: string): Promise<boolean> {
     ta.value = text;
     ta.style.cssText = 'position:fixed;opacity:0';
     document.body.appendChild(ta);
-    ta.select();
-    const ok = document.execCommand('copy');
-    ta.remove();
-    return ok;
+    const focused = document.activeElement;
+    try {
+      ta.select();
+      return document.execCommand('copy');
+    } catch {
+      return false;
+    } finally {
+      ta.remove();
+      if (focused instanceof HTMLElement) focused.focus({ preventScroll: true });
+    }
   }
+}
+
+/** 弹层打开时接住焦点，Tab 留在弹层中，关闭时回到原来的按钮。 */
+export function trapFocus(container: HTMLElement) {
+  const previous = document.activeElement;
+  const focusable = () => $$<HTMLElement>('a[href], button, input, select, textarea, [tabindex]', container)
+    .filter((el) => el.tabIndex >= 0 && !el.matches(':disabled') && !el.closest('[inert]') && el.getClientRects().length > 0);
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key !== 'Tab') return;
+    const items = focusable();
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (!first) {
+      e.preventDefault();
+      return;
+    }
+    if (e.shiftKey && (document.activeElement === first || !container.contains(document.activeElement))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || !container.contains(document.activeElement))) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+  document.addEventListener('keydown', onKey);
+  // 抽屉、设置面板、目录、灯箱靠 visibility 过渡显示，刚加上 .open 时还算隐藏，focus() 会落空：落空就下一帧再试
+  let released = false;
+  let tries = 0;
+  const focusIn = () => {
+    if (released) return;
+    (focusable()[0] ?? container).focus({ preventScroll: true });
+    if (!container.contains(document.activeElement) && ++tries < 10) requestAnimationFrame(focusIn);
+  };
+  focusIn();
+  return (restore = true) => {
+    released = true;
+    document.removeEventListener('keydown', onKey);
+    if (restore && previous instanceof HTMLElement && previous.isConnected) previous.focus({ preventScroll: true });
+  };
 }
 
 export interface DayActivity {
@@ -63,12 +109,18 @@ export interface DayActivity {
   posts: { t: string; u: string }[];
 }
 
+let activityNode: Element | null = null;
+let activityCache: Record<string, DayActivity> = {};
 export function activity(): Record<string, DayActivity> {
+  const node = $('#activity-data');
+  if (node === activityNode) return activityCache;
+  activityNode = node;
   try {
-    return JSON.parse($('#activity-data')?.textContent || '{}');
+    activityCache = JSON.parse(node?.textContent || '{}');
   } catch {
-    return {};
+    activityCache = {};
   }
+  return activityCache;
 }
 
 export const pad = (n: number) => String(n).padStart(2, '0');
@@ -76,12 +128,14 @@ export const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${p
 
 export function rafThrottle<T extends (...a: any[]) => void>(fn: T): T {
   let queued = false;
+  let latest: Parameters<T>;
   return ((...args: any[]) => {
+    latest = args as Parameters<T>;
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      fn(...args);
+      fn(...latest);
     });
   }) as T;
 }

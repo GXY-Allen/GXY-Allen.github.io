@@ -7,12 +7,14 @@ export function postIdFromPath(entry: string): string {
 
 /** 保留中文，只替换 URL 里有特殊含义或不美观的字符 */
 export function slugSegment(s: string): string {
-  return s
+  const slug = s
     .trim()
-    .replace(/[\s_]+/g, '-')
+    .replace(/[\s_/]+/g, '-')
     .replace(/[?#%\\:*"<>|'`^{}[\]]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+  // 标签和专栏只有一层路由；空名称或 . / .. 也不能成为路径片段。
+  return slug && !/^\.+$/.test(slug) ? slug : `item-${Array.from(s, (c) => c.codePointAt(0)!.toString(16)).join('-') || 'empty'}`;
 }
 
 /** 文章文件相对 posts 目录的路径 -> 分类路径（文件夹即分类） */

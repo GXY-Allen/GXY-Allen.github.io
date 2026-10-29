@@ -96,7 +96,10 @@ function resolveImage(filePath: string, src: string): ImageMetadata | string | u
     rel = decodeURI(rel);
   } catch {}
   const dir = posix.dirname('/' + filePath.replace(/\\/g, '/'));
-  const candidates = [posix.join(dir, rel), posix.join(dir, 'assets', posix.basename(rel))];
+  const candidates = [posix.join(dir, rel)];
+  if (!rel.includes('/')) {
+    for (const folder of ['assets', 'attachments', 'images']) candidates.push(posix.join(dir, folder, rel));
+  }
   for (const c of candidates) {
     const hit = localImages[c];
     if (hit) return hit.default;
@@ -109,6 +112,8 @@ function resolveImage(filePath: string, src: string): ImageMetadata | string | u
 let postsPromise: Promise<Post[]> | null = null;
 
 export function getPosts(): Promise<Post[]> {
+  // 内容集合可在开发服务器中独立更新，不把旧条目缓存到服务器重启。
+  if (import.meta.env.DEV) return loadPosts();
   postsPromise ??= loadPosts();
   return postsPromise;
 }
@@ -181,6 +186,7 @@ export interface CategoryNode {
 let treePromise: Promise<CategoryNode[]> | null = null;
 
 export function getCategoryTree(): Promise<CategoryNode[]> {
+  if (import.meta.env.DEV) return buildCategoryTree();
   treePromise ??= buildCategoryTree();
   return treePromise;
 }
@@ -255,10 +261,11 @@ export interface TagInfo {
 export async function getTags(): Promise<TagInfo[]> {
   const map = new Map<string, TagInfo>();
   for (const p of await getPosts())
-    for (const t of p.tags) {
+    for (const t of new Set(p.tags)) {
       const slug = slugSegment(t);
       if (!map.has(slug)) map.set(slug, { name: t, slug, url: tagUrl(t), posts: [] });
-      map.get(slug)!.posts.push(p);
+      const tag = map.get(slug)!;
+      if (!tag.posts.includes(p)) tag.posts.push(p);
     }
   return [...map.values()].sort((a, b) => b.posts.length - a.posts.length || a.name.localeCompare(b.name, 'zh'));
 }
@@ -279,11 +286,11 @@ export async function getSeries(): Promise<SeriesInfo[]> {
   for (const p of await getPosts()) {
     if (!p.series) continue;
     const slug = slugSegment(p.series);
-    if (!map.has(slug)) map.set(slug, { name: p.series, slug, url: seriesUrl(p.series), posts: [], updated: p.date, words: 0 });
+    if (!map.has(slug)) map.set(slug, { name: p.series, slug, url: seriesUrl(p.series), posts: [], updated: p.updated, words: 0 });
     const s = map.get(slug)!;
     s.posts.push(p);
     s.words += p.words;
-    if (p.date > s.updated) s.updated = p.date;
+    if (p.updated > s.updated) s.updated = p.updated;
   }
   for (const s of map.values())
     s.posts.sort(
